@@ -8,18 +8,27 @@
 import React from 'react'; // Added React import
 import { StatusBar, StyleSheet, useColorScheme, View, Text, TouchableOpacity } from 'react-native';
 import { useEffect } from 'react';
-import { Canvas, Fill } from "@shopify/react-native-skia";
+import { Canvas, Circle, Group } from "@shopify/react-native-skia"; // Updated imports
 
 // Function definition for the App component
 function App() {
   const isDarkMode = useColorScheme() === 'dark'; // Moved inside App
+  const width = 256;
+  const height = 256;
+  const r = width * 0.33;
 
   return (
     <View style={styles.container}>
-      <Canvas style={StyleSheet.absoluteFill}>
-        <Fill color="white" />
+      <Canvas style={{ width, height }}>
+        <Group blendMode="multiply">
+          <Circle cx={r} cy={r} r={r} color="cyan" />
+          <Circle cx={width - r} cy={r} r={r} color="magenta" />
+          <Circle cx={width / 2} cy={width - r} r={r} color="yellow" />
+        </Group>
       </Canvas>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      {/* The content View is kept, but it might be covered by the Canvas depending on styling.
+          The user might want to adjust the layout further. */}
       <View style={styles.content}>
         <Text style={styles.title}>Bienvenue sur Games APK</Text>
         <Text style={styles.subtitle}>Découvrez et lancez vos jeux préférés !</Text>
@@ -40,12 +49,12 @@ function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    // backgroundColor: '#000', // Commented out as Canvas might provide background
     justifyContent: 'center',
     alignItems: 'center',
   },
   content: {
-    position: 'absolute',
+    position: 'absolute', // This will overlay the content on top of the canvas
     top: 0,
     left: 0,
     right: 0,
