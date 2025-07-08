@@ -8,6 +8,7 @@
 import React from 'react'; // Added React import
 import { StatusBar, StyleSheet, useColorScheme, View, Text, TouchableOpacity } from 'react-native';
 import { useEffect } from 'react';
+import { Canvas, Fill } from "@shopify/react-native-skia";
 
 // Function definition for the App component
 function App() {
@@ -15,6 +16,9 @@ function App() {
 
   return (
     <View style={styles.container}>
+      <Canvas style={StyleSheet.absoluteFill}>
+        <Fill color="white" />
+      </Canvas>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <View style={styles.content}>
         <Text style={styles.title}>Bienvenue sur Games APK</Text>
