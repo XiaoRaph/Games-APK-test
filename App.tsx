@@ -5,11 +5,14 @@
  * @format
  */
 
+import React from 'react'; // Added React import
 import { StatusBar, StyleSheet, useColorScheme, View, Text, TouchableOpacity } from 'react-native';
 import { Canvas, useSharedValue, withRepeat, withTiming, useDerivedValue, LinearGradient, vec } from '@shopify/react-native-skia';
 import { useEffect } from 'react';
 
-  const isDarkMode = useColorScheme() === 'dark';
+// Function definition for the App component
+function App() {
+  const isDarkMode = useColorScheme() === 'dark'; // Moved inside App
 
   // Animation value for gradient
   const t = useSharedValue(0);
