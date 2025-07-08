@@ -42,7 +42,7 @@ jobs:
       #    La commande 'assembleDebug' crée un APK signé avec une clé de débogage par défaut.
       #    --no-daemon est une bonne pratique dans les environnements CI pour éviter les problèmes de cache.
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleRelease --no-daemon
         working-directory: android # Exécute la commande depuis le dossier 'android'
 
       # 7. Téléverse l'APK généré comme un artefact de build
@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           # Nom de l'artefact qui apparaîtra sur GitHub
-          name: app-debug
+          name: app-test
 
           # Chemin vers le fichier APK généré par 'assembleDeb
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/app-relezse.apk
