@@ -6,21 +6,20 @@
  */
 
 import { StatusBar, StyleSheet, useColorScheme, View, Text, TouchableOpacity } from 'react-native';
-import { Canvas, useValue, runTiming, useComputedValue, rect, LinearGradient, vec, Group } from '@shopify/react-native-skia';
+import { Canvas, useSharedValue, withRepeat, withTiming, useDerivedValue, LinearGradient, vec } from '@shopify/react-native-skia';
 import { useEffect } from 'react';
 
-function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
   // Animation value for gradient
-  const t = useValue(0);
+  const t = useSharedValue(0);
   useEffect(() => {
-    runTiming(t, 1, { duration: 6000, loop: true, yoyo: true });
+    t.value = withRepeat(withTiming(1, { duration: 6000 }), -1, true);
   }, [t]);
 
   // Animated gradient colors
-  const colors = useComputedValue(() => {
-    const progress = t.current;
+  const colors = useDerivedValue(() => {
+    const progress = t.value;
     return [
       `rgba(${Math.floor(255 * progress)}, 100, 200, 1)`,
       `rgba(100, ${Math.floor(255 * (1 - progress))}, 255, 1)`,
@@ -32,16 +31,34 @@ function App() {
     <View style={styles.container}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <Canvas style={StyleSheet.absoluteFill}>
-        <Group>
-          <LinearGradient
-            start={vec(0, 0)}
-            end={vec(400, 800)}
-            colors={colors}
-            positions={[0, 0.5, 1]}
-          >
-            {rect(0, 0, 400, 800)}
-          </LinearGradient>
-        </Group>
+        {/* Premier dégradé animé */}
+        <LinearGradient
+          start={vec(0, 0)}
+          end={vec(400, 800)}
+          colors={colors}
+          positions={[0, 0.5, 1]}
+        />
+        {/* Deuxième dégradé animé, avec d'autres couleurs et direction */}
+        <LinearGradient
+          start={vec(400, 0)}
+          end={vec(0, 800)}
+          colors={useDerivedValue(() => [
+            `rgba(255, ${Math.floor(200 * t.value)}, 100, 0.25)`,
+            `rgba(100, 255, ${Math.floor(255 * (1 - t.value))}, 0.18)`,
+            `rgba(100, 200, 255, 0.12)`
+          ], [t])}
+          positions={[0, 0.5, 1]}
+        />
+        {/* Troisième dégradé, subtil, pour effet de profondeur */}
+        <LinearGradient
+          start={vec(200, 0)}
+          end={vec(200, 800)}
+          colors={useDerivedValue(() => [
+            `rgba(255, 255, 255, ${0.08 + 0.08 * Math.abs(Math.sin(t.value * Math.PI))})`,
+            `rgba(0, 0, 0, 0)`
+          ], [t])}
+          positions={[0, 1]}
+        />
       </Canvas>
       <View style={styles.content}>
         <Text style={styles.title}>Bienvenue sur Games APK</Text>
