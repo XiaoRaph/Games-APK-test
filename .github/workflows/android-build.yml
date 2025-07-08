@@ -54,4 +54,4 @@ jobs:
           name: app-test
 
           # Chemin vers le fichier APK généré par 'assembleDeb
-          path: android/app/build/outputs/apk/debug/app-relezse.apk
+          path: android/app/build/outputs/apk/debug/app-release.apk
