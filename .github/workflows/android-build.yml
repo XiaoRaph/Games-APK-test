@@ -36,7 +36,7 @@ jobs:
 
       - name: Build Release APK
 
-        run: ./gradlew assembleRelease --no-daemon
+        run: ./gradlew assembleDebug --no-daemon
         working-directory: android 
 
       - name: Upload Release APK as Artifact
