@@ -19,10 +19,8 @@ import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE,
   // DIRECTIONS
 } from '../constants/gameConstants';
 import { Snake as SnakeType,
-  // Coordinates,
-  // Direction,
   Coordinates,
-  // Direction,
+  Direction,
   Food
 } from '../types';
 // import Joystick from '../components/Joystick';
@@ -45,7 +43,7 @@ const Game: React.FC = () => {
     { x: 3, y: 5 },
   ];
   const [snake, setSnake] = useState<SnakeType>(initialSnake);
-  // const [direction, setDirection] = useState<Direction>('RIGHT');
+  const [direction, setDirection] = useState<Direction>('RIGHT');
   const [food, setFood] = useState<Food>(getRandomPosition(initialSnake));
   // const [score, setScore] = useState<number>(0);
   // const [isGameOver, setIsGameOver] = useState<boolean>(false);
