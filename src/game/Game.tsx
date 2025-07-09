@@ -1,7 +1,7 @@
 import React, {
   useState,
-  // useEffect,
-  // useCallback
+  useEffect,
+  useCallback
 } from 'react';
 import { View, StyleSheet,
   // Text,
@@ -15,8 +15,8 @@ import { Canvas,
   // PaintStyle,
   Group } from '@shopify/react-native-skia';
 import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE,
-  // GAME_SPEED_MS,
-  // DIRECTIONS
+  GAME_SPEED_MS,
+  DIRECTIONS
 } from '../constants/gameConstants';
 import { Snake as SnakeType,
   Coordinates,
@@ -46,8 +46,8 @@ const Game: React.FC = () => {
   const [direction, setDirection] = useState<Direction>('RIGHT');
   const [food, setFood] = useState<Food>(getRandomPosition(initialSnake));
   // const [score, setScore] = useState<number>(0);
-  // const [isGameOver, setIsGameOver] = useState<boolean>(false);
-  // const gameLoopIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
+  // const [isGameOver, setIsGameOver] = useState<boolean>(false); // Will be uncommented later
+  const gameLoopIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
 
   // Grid drawing
@@ -73,44 +73,44 @@ const Game: React.FC = () => {
   //   }
   // }, [direction]); // Add direction to dependencies
 
-  // const updateGame = useCallback(() => {
-  //   setSnake(prevSnake => {
-  //     const newSnake = prevSnake.map(segment => ({ ...segment }));
-  //     const head = { ...newSnake[0] };
-  //     const move = DIRECTIONS[direction];
+  const updateGame = useCallback(() => {
+    setSnake(prevSnake => {
+      const newSnake = prevSnake.map(segment => ({ ...segment }));
+      const head = { ...newSnake[0] };
+      const move = DIRECTIONS[direction];
 
-  //     head.x += move.x;
-  //     head.y += move.y;
+      head.x += move.x;
+      head.y += move.y;
 
-  //     // Check for wall collision
-  //     if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
-  //       setIsGameOver(true);
-  //       return prevSnake; // Don't update snake further
-  //     }
+      // Check for wall collision
+      if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
+        // setIsGameOver(true); // Temporarily commented
+        return prevSnake; // Don't update snake further
+      }
 
-  //     // Check for self-collision (excluding the very tail, which will move away)
-  //     for (let i = 1; i < newSnake.length -1 ; i++) {
-  //       if (newSnake[i].x === head.x && newSnake[i].y === head.y) {
-  //         setIsGameOver(true);
-  //         return prevSnake; // Don't update snake further
-  //       }
-  //     }
+      // Check for self-collision (excluding the very tail, which will move away)
+      // for (let i = 1; i < newSnake.length -1 ; i++) {
+      //   if (newSnake[i].x === head.x && newSnake[i].y === head.y) {
+      //     setIsGameOver(true); // Temporarily commented
+      //     return prevSnake; // Don't update snake further
+      //   }
+      // }
 
-  //     let ateFood = false;
-  //     if (head.x === food.x && head.y === food.y) {
-  //       ateFood = true;
-  //       setScore(s => s + 10); // Increment score
-  //       setFood(getRandomPosition(newSnake)); // Pass newSnake to avoid spawning on just moved head
-  //     }
+      // let ateFood = false;
+      // if (head.x === food.x && head.y === food.y) {
+      //   ateFood = true;
+      //   // setScore(s => s + 10); // Temporarily commented
+      //   // setFood(getRandomPosition(newSnake)); // Temporarily commented
+      // }
 
-  //     newSnake.unshift(head);
+      newSnake.unshift(head);
 
-  //     if (!ateFood) {
-  //       newSnake.pop();
-  //     }
-  //     return newSnake;
-  //   });
-  // }, [direction, food]); // Removed score from here, setScore is stable
+      // if (!ateFood) { // Temporarily always make the snake move without growing
+      newSnake.pop();
+      // }
+      return newSnake;
+    });
+  }, [direction]); // food dependency will be added back when food logic is uncommented. setIsGameOver and setScore too.
 
   // const resetGame = () => {
   //   setSnake(initialSnake);
@@ -129,27 +129,27 @@ const Game: React.FC = () => {
   //   // canvas.drawPath(gridPath, gridPaint); // This is done declaratively below
   // }, [gridPath]);
 
-  // useEffect(() => {
-  //   if (isGameOver) {
-  //     if (gameLoopIntervalRef.current) {
-  //       clearInterval(gameLoopIntervalRef.current);
-  //       gameLoopIntervalRef.current = null;
-  //     }
-  //     return;
-  //   }
+  useEffect(() => {
+    // if (isGameOver) { // Temporarily commented
+    //   if (gameLoopIntervalRef.current) {
+    //     clearInterval(gameLoopIntervalRef.current);
+    //     gameLoopIntervalRef.current = null;
+    //   }
+    //   return;
+    // }
 
-  //   // Start or restart the game loop
-  //   if (!gameLoopIntervalRef.current) {
-  //       gameLoopIntervalRef.current = setInterval(updateGame, GAME_SPEED_MS);
-  //   }
+    // Start or restart the game loop
+    if (!gameLoopIntervalRef.current) {
+        gameLoopIntervalRef.current = setInterval(updateGame, GAME_SPEED_MS);
+    }
 
-  //   return () => { // Cleanup on component unmount or before isGameOver changes back to false (if that happens)
-  //     if (gameLoopIntervalRef.current) {
-  //       clearInterval(gameLoopIntervalRef.current);
-  //       gameLoopIntervalRef.current = null;
-  //     }
-  //   };
-  // }, [updateGame, isGameOver]); // Add isGameOver as a dependency
+    return () => { // Cleanup on component unmount or before isGameOver changes back to false (if that happens)
+      if (gameLoopIntervalRef.current) {
+        clearInterval(gameLoopIntervalRef.current);
+        gameLoopIntervalRef.current = null;
+      }
+    };
+  }, [updateGame]); // isGameOver dependency will be added back
 
   // Score text paint
   // const scoreTextPaint = Skia.Paint();
