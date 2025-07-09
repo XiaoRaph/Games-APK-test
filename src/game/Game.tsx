@@ -10,7 +10,7 @@ import { View, StyleSheet,
 import { Canvas,
   RoundedRect,
   Path, Skia, useDrawCallback,
-  // Circle,
+  Circle,
   // Text as SkiaText,
   // PaintStyle,
   Group } from '@shopify/react-native-skia';
@@ -21,20 +21,22 @@ import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE,
 import { Snake as SnakeType,
   // Coordinates,
   // Direction,
-  // Food
+  Coordinates,
+  // Direction,
+  Food
 } from '../types';
 // import Joystick from '../components/Joystick';
 
-// const getRandomPosition = (snakeBody: SnakeType): Coordinates => {
-//   let position: Coordinates;
-//   do {
-//     position = {
-//       x: Math.floor(Math.random() * GRID_SIZE),
-//       y: Math.floor(Math.random() * GRID_SIZE),
-//     };
-//   } while (snakeBody.some(segment => segment.x === position.x && segment.y === position.y));
-//   return position;
-// };
+const getRandomPosition = (snakeBody: SnakeType): Coordinates => {
+  let position: Coordinates;
+  do {
+    position = {
+      x: Math.floor(Math.random() * GRID_SIZE),
+      y: Math.floor(Math.random() * GRID_SIZE),
+    };
+  } while (snakeBody.some(segment => segment.x === position.x && segment.y === position.y));
+  return position;
+};
 
 const Game: React.FC = () => {
   const initialSnake: SnakeType = [
@@ -44,7 +46,7 @@ const Game: React.FC = () => {
   ];
   const [snake, setSnake] = useState<SnakeType>(initialSnake);
   // const [direction, setDirection] = useState<Direction>('RIGHT');
-  // const [food, setFood] = useState<Food>(getRandomPosition(initialSnake));
+  const [food, setFood] = useState<Food>(getRandomPosition(initialSnake));
   // const [score, setScore] = useState<number>(0);
   // const [isGameOver, setIsGameOver] = useState<boolean>(false);
   // const gameLoopIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -188,12 +190,12 @@ const Game: React.FC = () => {
         />
 
         {/* Food */}
-        {/* <Circle
+        <Circle
           cx={food.x * TILE_SIZE + TILE_SIZE / 2}
           cy={food.y * TILE_SIZE + TILE_SIZE / 2}
           r={TILE_SIZE / 2.5}
           color={COLORS.food}
-        /> */}
+        />
 
         {/* Snake */}
         {snake.map((segment, index) => (
