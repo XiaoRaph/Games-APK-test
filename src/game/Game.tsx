@@ -11,8 +11,8 @@ import { Canvas,
   RoundedRect,
   Path, Skia, useDrawCallback,
   Circle,
-  // Text as SkiaText,
-  // PaintStyle,
+  Text as SkiaText,
+  PaintStyle,
   Group } from '@shopify/react-native-skia';
 import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE,
   GAME_SPEED_MS,
@@ -45,7 +45,7 @@ const Game: React.FC = () => {
   const [snake, setSnake] = useState<SnakeType>(initialSnake);
   const [direction, setDirection] = useState<Direction>('RIGHT');
   const [food, setFood] = useState<Food>(getRandomPosition(initialSnake));
-  // const [score, setScore] = useState<number>(0);
+  const [score, setScore] = useState<number>(0);
   // const [isGameOver, setIsGameOver] = useState<boolean>(false); // Will be uncommented later
   const gameLoopIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
@@ -96,21 +96,21 @@ const Game: React.FC = () => {
       //   }
       // }
 
-      // let ateFood = false;
-      // if (head.x === food.x && head.y === food.y) {
-      //   ateFood = true;
-      //   // setScore(s => s + 10); // Temporarily commented
-      //   // setFood(getRandomPosition(newSnake)); // Temporarily commented
-      // }
+      let ateFood = false;
+      if (head.x === food.x && head.y === food.y) {
+        ateFood = true;
+        setScore(s => s + 10);
+        setFood(getRandomPosition(newSnake));
+      }
 
       newSnake.unshift(head);
 
-      // if (!ateFood) { // Temporarily always make the snake move without growing
-      newSnake.pop();
-      // }
+      if (!ateFood) {
+        newSnake.pop();
+      }
       return newSnake;
     });
-  }, [direction]); // food dependency will be added back when food logic is uncommented. setIsGameOver and setScore too.
+  }, [direction, food, score]); // Added food and score to dependencies, setScore is stable
 
   // const resetGame = () => {
   //   setSnake(initialSnake);
@@ -152,9 +152,9 @@ const Game: React.FC = () => {
   }, [updateGame]); // isGameOver dependency will be added back
 
   // Score text paint
-  // const scoreTextPaint = Skia.Paint();
-  // scoreTextPaint.setColor(Skia.Color(COLORS.white));
-  // scoreTextPaint.setStyle(PaintStyle.Fill);
+  const scoreTextPaint = Skia.Paint();
+  scoreTextPaint.setColor(Skia.Color(COLORS.white));
+  scoreTextPaint.setStyle(PaintStyle.Fill);
   // scoreTextPaint.setAntiAlias(true); // Skia does this by default for text
 
   // Game Over text paint
@@ -163,16 +163,16 @@ const Game: React.FC = () => {
   // gameOverTextPaint.setStyle(PaintStyle.Fill);
   // gameOverTextPaint.setAntiAlias(true);
 
-  // let scoreFont = Skia.FontMgr.RefDefault().matchFamilyStyle('monospace');
-  // if (!scoreFont) {
-  //   console.warn("Monospace font not found, attempting to use default system font for score.");
-  //   scoreFont = Skia.FontMgr.RefDefault().default();
-  // }
-  // if (!scoreFont) {
-  //   console.warn("Default system font not found, using basic Skia.Font(). Score text might not render correctly.");
-  //   // As a last resort, create a basic font object. Text might not be styled as expected.
-  //   scoreFont = Skia.Font();
-  // }
+  let scoreFont = Skia.FontMgr.RefDefault().matchFamilyStyle('monospace');
+  if (!scoreFont) {
+    console.warn("Monospace font not found, attempting to use default system font for score.");
+    scoreFont = Skia.FontMgr.RefDefault().default();
+  }
+  if (!scoreFont) {
+    console.warn("Default system font not found, using basic Skia.Font(). Score text might not render correctly.");
+    // As a last resort, create a basic font object. Text might not be styled as expected.
+    scoreFont = Skia.Font();
+  }
 
 
   return (
@@ -209,14 +209,14 @@ const Game: React.FC = () => {
         ))}
 
         {/* Score Display */}
-        {/* <SkiaText
+        <SkiaText
             x={10}
             y={25} // Adjust y position as needed
             text={`Score: ${score}`}
             font={scoreFont}
             size={20} // Skia text size is different from React Native Text fontSize
             paint={scoreTextPaint}
-        /> */}
+        />
         </Group>
       </Canvas>
 
