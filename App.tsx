@@ -62,21 +62,27 @@ function App() {
   const size = screenWidth * 0.33;
   const centerX = screenWidth / 2;
   // const centerY = screenHeight / 2 - headerHeight; // Adjusted for no headerHeight
-  const centerY = screenHeight / 2;
+  const centerY = screenHeight / 2; // This will be adjusted in the next step for canvas-relative positioning
 
+  // Define fixed height for the canvas for now
+  const canvasHeight = screenHeight * 0.6; // Canvas takes 60% of screen height
 
   return (
     <View style={styles.container}>
-      <Canvas style={{ flex: 1 }}>
-        <Group blendMode="multiply">
-          <AnimatedCircle centerX={centerX} centerY={centerY} size={size} initialAngle={0} color="cyan" />
-          <AnimatedCircle centerX={centerX} centerY={centerY} size={size} initialAngle={(Math.PI * 2) / 3}  color="magenta" />
-          <AnimatedCircle centerX={centerX} centerY={centerY} size={size} initialAngle={(Math.PI * 4) / 3}  color="yellow" />
-        </Group>
-      </Canvas>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      {/* The content View is kept, but it might be covered by the Canvas depending on styling.
-          The user might want to adjust the layout further. */}
+      <View style={{height: canvasHeight, width: '100%'}}>
+        <Canvas style={{ flex: 1 }}>
+          <Group blendMode="multiply">
+            {/* centerX and centerY for AnimatedCircle will need adjustment in the next step
+                to be relative to this new canvasHeight and its actual center */}
+            <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={0} color="cyan" />
+            <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={(Math.PI * 2) / 3}  color="magenta" />
+            <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={(Math.PI * 4) / 3}  color="yellow" />
+          </Group>
+        </Canvas>
+      </View>
+
+      {/* Content View is now below the Canvas */}
       <View style={styles.content}>
         <Text style={styles.title}>Bienvenue sur Games APK</Text>
         <Text style={styles.subtitle}>Découvrez et lancez vos jeux préférés !</Text>
@@ -97,19 +103,21 @@ function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: '#000', // Commented out as Canvas might provide background
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: 'column', // Arrange canvas and content vertically
+    // backgroundColor: '#000', // Keep commented out or set a page background
+    alignItems: 'center', // Center items horizontally
+    justifyContent: 'flex-start', // Start content from the top
   },
   content: {
-    position: 'absolute', // This will overlay the content on top of the canvas
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    // position: 'absolute', // Removed absolute positioning
+    // top: 0, // Removed
+    // left: 0, // Removed
+    // right: 0, // Removed
+    // bottom: 0, // Removed
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 2,
+    // zIndex: 2, // Removed
+    paddingVertical: 20, // Add some padding
   },
   title: {
     fontSize: 32,
