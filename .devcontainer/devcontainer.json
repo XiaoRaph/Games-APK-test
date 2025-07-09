@@ -1,12 +1,15 @@
 {
-  "name": "React Native Android App",
+  "name": "React Native Android App (Manuel)",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:18-bullseye",
 
-  "features": {
-    "ghcr.io/devcontainers/features/android-cli:1": {}
+
+  "containerEnv": {
+    "ANDROID_HOME": "/usr/lib/android-sdk",
+    "ANDROID_SDK_ROOT": "/usr/lib/android-sdk"
   },
 
-
+  "onCreateCommand": "sudo apt-get update && sudo apt-get install -y openjdk-17-jdk wget unzip && sudo mkdir -p /usr/lib/android-sdk && cd /usr/lib/android-sdk && sudo wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip && sudo unzip commandlinetools-linux-*.zip && sudo rm commandlinetools-linux-*.zip && sudo mv cmdline-tools latest && sudo mkdir -p latest/bin && sudo mv latest/NOTICE.txt latest/bin/ && sudo mv latest/source.properties latest/bin/ && sudo mv latest/lib latest/bin/ && yes | sudo /usr/lib/android-sdk/latest/bin/sdkmanager --licenses && sudo /usr/lib/android-sdk/latest/bin/sdkmanager \"platform-tools\" \"platforms;android-33\" \"build-tools;33.0.0\" && sudo npm install -g yarn",
+  
   "postCreateCommand": "npm install",
 
   "forwardPorts": [8081],
