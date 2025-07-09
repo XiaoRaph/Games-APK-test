@@ -9,21 +9,69 @@ import React from 'react'; // Added React import
 import { StatusBar, StyleSheet, useColorScheme, View, Text, TouchableOpacity } from 'react-native';
 import { useEffect } from 'react';
 import { Canvas, Circle, Group } from "@shopify/react-native-skia"; // Updated imports
+import {
+  useSharedValue,
+  useDerivedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
+import { Dimensions } from 'react-native'; // Added Dimensions import
+
+// Type definition for AnimatedCircle props
+type AnimatedCircleProps = {
+  color: string;
+  size: number;
+  centerX: number;
+  centerY: number;
+  initialAngle: number;
+};
+
+// AnimatedCircle component definition
+const AnimatedCircle = ({color, size, centerX, centerY, initialAngle}: AnimatedCircleProps) => {
+  const distance = size * 0.25;
+  const angle = useSharedValue(initialAngle);
+  const r_val = useSharedValue(size * 0.3); // Renamed r to r_val to avoid conflict
+  const cx = useDerivedValue(
+    () => centerX + distance * Math.cos(angle.value)
+  );
+  const cy = useDerivedValue(
+    () => centerY + distance * Math.sin(angle.value)
+  );
+
+  useEffect(() => {
+    angle.value = withRepeat(
+      withTiming(angle.value + Math.PI * 6, { duration: 3000 }),
+      -1
+    );
+  }, [angle]);
+
+  useEffect(() => {
+    r_val.value = withRepeat(withTiming(size * 1.15, { duration: 1500 }), -1, true);
+  }, [r_val, size]);
+
+  return <Circle cx={cx} cy={cy} r={r_val} color={color} />;
+};
+
 
 // Function definition for the App component
 function App() {
   const isDarkMode = useColorScheme() === 'dark'; // Moved inside App
-  const width = 256;
-  const height = 256;
-  const r = width * 0.33;
+  // const headerHeight = useHeaderHeight(); // Assuming no header or headerHeight is 0 for now
+  const screenWidth = Dimensions.get("window").width;
+  const screenHeight = Dimensions.get("window").height;
+  const size = screenWidth * 0.33;
+  const centerX = screenWidth / 2;
+  // const centerY = screenHeight / 2 - headerHeight; // Adjusted for no headerHeight
+  const centerY = screenHeight / 2;
+
 
   return (
     <View style={styles.container}>
-      <Canvas style={{ width, height }}>
+      <Canvas style={{ flex: 1 }}>
         <Group blendMode="multiply">
-          <Circle cx={r} cy={r} r={r} color="cyan" />
-          <Circle cx={width - r} cy={r} r={r} color="magenta" />
-          <Circle cx={width / 2} cy={width - r} r={r} color="yellow" />
+          <AnimatedCircle centerX={centerX} centerY={centerY} size={size} initialAngle={0} color="cyan" />
+          <AnimatedCircle centerX={centerX} centerY={centerY} size={size} initialAngle={(Math.PI * 2) / 3}  color="magenta" />
+          <AnimatedCircle centerX={centerX} centerY={centerY} size={size} initialAngle={(Math.PI * 4) / 3}  color="yellow" />
         </Group>
       </Canvas>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
