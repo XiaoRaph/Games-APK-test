@@ -5,61 +5,84 @@
  * @format
  */
 
+import React from 'react'; // Added React import
 import { StatusBar, StyleSheet, useColorScheme, View, Text, TouchableOpacity } from 'react-native';
-import { Canvas, useSharedValue, withRepeat, withTiming, useDerivedValue, LinearGradient, vec } from '@shopify/react-native-skia';
 import { useEffect } from 'react';
+import { Canvas, Circle, Group } from "@shopify/react-native-skia"; // Updated imports
+import {
+  useSharedValue,
+  useDerivedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
+import { Dimensions } from 'react-native'; // Added Dimensions import
 
-  const isDarkMode = useColorScheme() === 'dark';
+// Type definition for AnimatedCircle props
+type AnimatedCircleProps = {
+  color: string;
+  size: number;
+  centerX: number;
+  centerY: number;
+  initialAngle: number;
+};
 
-  // Animation value for gradient
-  const t = useSharedValue(0);
+// AnimatedCircle component definition
+const AnimatedCircle = ({color, size, centerX, centerY, initialAngle}: AnimatedCircleProps) => {
+  const distance = size * 0.25;
+  const angle = useSharedValue(initialAngle);
+  const r_val = useSharedValue(size * 0.3); // Renamed r to r_val to avoid conflict
+  const cx = useDerivedValue(
+    () => centerX + distance * Math.cos(angle.value)
+  );
+  const cy = useDerivedValue(
+    () => centerY + distance * Math.sin(angle.value)
+  );
+
   useEffect(() => {
-    t.value = withRepeat(withTiming(1, { duration: 6000 }), -1, true);
-  }, [t]);
+    angle.value = withRepeat(
+      withTiming(angle.value + Math.PI * 6, { duration: 3000 }),
+      -1
+    );
+  }, [angle]);
 
-  // Animated gradient colors
-  const colors = useDerivedValue(() => {
-    const progress = t.value;
-    return [
-      `rgba(${Math.floor(255 * progress)}, 100, 200, 1)`,
-      `rgba(100, ${Math.floor(255 * (1 - progress))}, 255, 1)`,
-      `rgba(255, 255, ${Math.floor(255 * progress)}, 1)`
-    ];
-  }, [t]);
+  useEffect(() => {
+    r_val.value = withRepeat(withTiming(size * 1.15, { duration: 1500 }), -1, true);
+  }, [r_val, size]);
+
+  return <Circle cx={cx} cy={cy} r={r_val} color={color} />;
+};
+
+
+// Function definition for the App component
+function App() {
+  const isDarkMode = useColorScheme() === 'dark'; // Moved inside App
+  // const headerHeight = useHeaderHeight(); // Assuming no header or headerHeight is 0 for now
+  const screenWidth = Dimensions.get("window").width;
+  const screenHeight = Dimensions.get("window").height;
+  const size = screenWidth * 0.33;
+  const centerX = screenWidth / 2;
+  // const centerY = screenHeight / 2 - headerHeight; // Adjusted for no headerHeight
+  const centerY = screenHeight / 2; // This will be adjusted in the next step for canvas-relative positioning
+
+  // Define fixed height for the canvas for now
+  const canvasHeight = screenHeight * 0.6; // Canvas takes 60% of screen height
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <Canvas style={StyleSheet.absoluteFill}>
-        {/* Premier dégradé animé */}
-        <LinearGradient
-          start={vec(0, 0)}
-          end={vec(400, 800)}
-          colors={colors}
-          positions={[0, 0.5, 1]}
-        />
-        {/* Deuxième dégradé animé, avec d'autres couleurs et direction */}
-        <LinearGradient
-          start={vec(400, 0)}
-          end={vec(0, 800)}
-          colors={useDerivedValue(() => [
-            `rgba(255, ${Math.floor(200 * t.value)}, 100, 0.25)`,
-            `rgba(100, 255, ${Math.floor(255 * (1 - t.value))}, 0.18)`,
-            `rgba(100, 200, 255, 0.12)`
-          ], [t])}
-          positions={[0, 0.5, 1]}
-        />
-        {/* Troisième dégradé, subtil, pour effet de profondeur */}
-        <LinearGradient
-          start={vec(200, 0)}
-          end={vec(200, 800)}
-          colors={useDerivedValue(() => [
-            `rgba(255, 255, 255, ${0.08 + 0.08 * Math.abs(Math.sin(t.value * Math.PI))})`,
-            `rgba(0, 0, 0, 0)`
-          ], [t])}
-          positions={[0, 1]}
-        />
-      </Canvas>
+      <View style={{height: canvasHeight, width: '100%'}}>
+        <Canvas style={{ flex: 1 }}>
+          <Group blendMode="multiply">
+            {/* centerX and centerY for AnimatedCircle will need adjustment in the next step
+                to be relative to this new canvasHeight and its actual center */}
+            <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={0} color="cyan" />
+            <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={(Math.PI * 2) / 3}  color="magenta" />
+            <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={(Math.PI * 4) / 3}  color="yellow" />
+          </Group>
+        </Canvas>
+      </View>
+
+      {/* Content View is now below the Canvas */}
       <View style={styles.content}>
         <Text style={styles.title}>Bienvenue sur Games APK</Text>
         <Text style={styles.subtitle}>Découvrez et lancez vos jeux préférés !</Text>
@@ -80,19 +103,21 @@ import { useEffect } from 'react';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: 'column', // Arrange canvas and content vertically
+    // backgroundColor: '#000', // Keep commented out or set a page background
+    alignItems: 'center', // Center items horizontally
+    justifyContent: 'flex-start', // Start content from the top
   },
   content: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    // position: 'absolute', // Removed absolute positioning
+    // top: 0, // Removed
+    // left: 0, // Removed
+    // right: 0, // Removed
+    // bottom: 0, // Removed
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 2,
+    // zIndex: 2, // Removed
+    paddingVertical: 20, // Add some padding
   },
   title: {
     fontSize: 32,
