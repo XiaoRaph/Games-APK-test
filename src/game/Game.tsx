@@ -1,5 +1,5 @@
 import React, {
-  // useState,
+  useState,
   // useEffect,
   // useCallback
 } from 'react';
@@ -8,7 +8,7 @@ import { View, StyleSheet,
   // TouchableOpacity
 } from 'react-native'; // Import Text and TouchableOpacity
 import { Canvas,
-  // RoundedRect,
+  RoundedRect,
   Path, Skia, useDrawCallback,
   // Circle,
   // Text as SkiaText,
@@ -18,7 +18,11 @@ import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE,
   // GAME_SPEED_MS,
   // DIRECTIONS
 } from '../constants/gameConstants';
-// import { Snake as SnakeType, Coordinates, Direction, Food } from '../types';
+import { Snake as SnakeType,
+  // Coordinates,
+  // Direction,
+  // Food
+} from '../types';
 // import Joystick from '../components/Joystick';
 
 // const getRandomPosition = (snakeBody: SnakeType): Coordinates => {
@@ -33,12 +37,12 @@ import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE,
 // };
 
 const Game: React.FC = () => {
-  // const initialSnake: SnakeType = [
-  //   { x: 5, y: 5 },
-  //   { x: 4, y: 5 },
-  //   { x: 3, y: 5 },
-  // ];
-  // const [snake, setSnake] = useState<SnakeType>(initialSnake);
+  const initialSnake: SnakeType = [
+    { x: 5, y: 5 },
+    { x: 4, y: 5 },
+    { x: 3, y: 5 },
+  ];
+  const [snake, setSnake] = useState<SnakeType>(initialSnake);
   // const [direction, setDirection] = useState<Direction>('RIGHT');
   // const [food, setFood] = useState<Food>(getRandomPosition(initialSnake));
   // const [score, setScore] = useState<number>(0);
@@ -192,7 +196,7 @@ const Game: React.FC = () => {
         /> */}
 
         {/* Snake */}
-        {/* {snake.map((segment, index) => (
+        {snake.map((segment, index) => (
           <RoundedRect
             key={index}
             x={segment.x * TILE_SIZE}
@@ -202,7 +206,7 @@ const Game: React.FC = () => {
             r={3}
             color={index === 0 ? COLORS.snakeHead : COLORS.snakeBody}
           />
-        ))} */}
+        ))}
 
         {/* Score Display */}
         {/* <SkiaText
