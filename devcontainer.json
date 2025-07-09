@@ -1,0 +1,28 @@
+{
+  "name": "React Native Android App",
+
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:18-bullseye",
+
+    "ghcr.io/devcontainers/features/android-cli:1": {
+      "installBazel": false,
+      "installNdk": false // Pas besoin du NDK pour une build standard
+    }
+  },
+
+
+  "postCreateCommand": "npm install",
+
+
+  "forwardPorts": [8081],
+
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "msjsdiag.vscode-react-native"
+      ]
+    }
+  }
+}
