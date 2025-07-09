@@ -1,8 +1,24 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native'; // Import Text and TouchableOpacity
-import { Canvas, RoundedRect, Path, Skia, useDrawCallback, Circle, Text as SkiaText, PaintStyle, Group } from '@shopify/react-native-skia';
-import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE, GAME_SPEED_MS, DIRECTIONS } from '../constants/gameConstants';
-import { Snake as SnakeType, Coordinates, Direction, Food } from '../types';
+import React, {
+  // useState,
+  // useEffect,
+  // useCallback
+} from 'react';
+import { View, StyleSheet,
+  // Text,
+  // TouchableOpacity
+} from 'react-native'; // Import Text and TouchableOpacity
+import { Canvas,
+  // RoundedRect,
+  Path, Skia, useDrawCallback,
+  // Circle,
+  // Text as SkiaText,
+  // PaintStyle,
+  Group } from '@shopify/react-native-skia';
+import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE,
+  // GAME_SPEED_MS,
+  // DIRECTIONS
+} from '../constants/gameConstants';
+// import { Snake as SnakeType, Coordinates, Direction, Food } from '../types';
 // import Joystick from '../components/Joystick';
 
 // const getRandomPosition = (snakeBody: SnakeType): Coordinates => {
