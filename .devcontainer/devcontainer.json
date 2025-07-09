@@ -1,0 +1,20 @@
+{
+  "name": "React Native Android App",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:18-bullseye",
+
+  "features": {
+    "ghcr.io/devcontainers/features/android-cli:1": {}
+  },
+
+
+  "postCreateCommand": "npm install",
+
+  "forwardPorts": [8081],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "msjsdiag.vscode-react-native"
+      ]
+    }
+  }
+}
