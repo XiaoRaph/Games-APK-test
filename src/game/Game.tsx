@@ -3,31 +3,31 @@ import { View, StyleSheet, Text, TouchableOpacity } from 'react-native'; // Impo
 import { Canvas, RoundedRect, Path, Skia, useDrawCallback, Circle, Text as SkiaText, PaintStyle, Group } from '@shopify/react-native-skia';
 import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE, GAME_SPEED_MS, DIRECTIONS } from '../constants/gameConstants';
 import { Snake as SnakeType, Coordinates, Direction, Food } from '../types';
-import Joystick from '../components/Joystick';
+// import Joystick from '../components/Joystick';
 
-const getRandomPosition = (snakeBody: SnakeType): Coordinates => {
-  let position: Coordinates;
-  do {
-    position = {
-      x: Math.floor(Math.random() * GRID_SIZE),
-      y: Math.floor(Math.random() * GRID_SIZE),
-    };
-  } while (snakeBody.some(segment => segment.x === position.x && segment.y === position.y));
-  return position;
-};
+// const getRandomPosition = (snakeBody: SnakeType): Coordinates => {
+//   let position: Coordinates;
+//   do {
+//     position = {
+//       x: Math.floor(Math.random() * GRID_SIZE),
+//       y: Math.floor(Math.random() * GRID_SIZE),
+//     };
+//   } while (snakeBody.some(segment => segment.x === position.x && segment.y === position.y));
+//   return position;
+// };
 
 const Game: React.FC = () => {
-  const initialSnake: SnakeType = [
-    { x: 5, y: 5 },
-    { x: 4, y: 5 },
-    { x: 3, y: 5 },
-  ];
-  const [snake, setSnake] = useState<SnakeType>(initialSnake);
-  const [direction, setDirection] = useState<Direction>('RIGHT');
-  const [food, setFood] = useState<Food>(getRandomPosition(initialSnake));
-  const [score, setScore] = useState<number>(0);
-  const [isGameOver, setIsGameOver] = useState<boolean>(false);
-  const gameLoopIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
+  // const initialSnake: SnakeType = [
+  //   { x: 5, y: 5 },
+  //   { x: 4, y: 5 },
+  //   { x: 3, y: 5 },
+  // ];
+  // const [snake, setSnake] = useState<SnakeType>(initialSnake);
+  // const [direction, setDirection] = useState<Direction>('RIGHT');
+  // const [food, setFood] = useState<Food>(getRandomPosition(initialSnake));
+  // const [score, setScore] = useState<number>(0);
+  // const [isGameOver, setIsGameOver] = useState<boolean>(false);
+  // const gameLoopIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
 
   // Grid drawing
@@ -39,66 +39,66 @@ const Game: React.FC = () => {
     gridPath.lineTo(CANVAS_WIDTH, i * TILE_SIZE);
   }
 
-  const handleDirectionChange = useCallback((newDirection: Direction | null) => {
-    if (newDirection) {
-      // Basic check to prevent immediate 180-degree turns.
-      // More sophisticated logic might be needed in Joystick or here.
-      const currentMove = DIRECTIONS[direction];
-      const newMove = DIRECTIONS[newDirection];
-      if (currentMove.x + newMove.x === 0 && currentMove.y + newMove.y === 0) {
-        // Trying to move directly opposite
-        return;
-      }
-      setDirection(newDirection);
-    }
-  }, [direction]); // Add direction to dependencies
+  // const handleDirectionChange = useCallback((newDirection: Direction | null) => {
+  //   if (newDirection) {
+  //     // Basic check to prevent immediate 180-degree turns.
+  //     // More sophisticated logic might be needed in Joystick or here.
+  //     const currentMove = DIRECTIONS[direction];
+  //     const newMove = DIRECTIONS[newDirection];
+  //     if (currentMove.x + newMove.x === 0 && currentMove.y + newMove.y === 0) {
+  //       // Trying to move directly opposite
+  //       return;
+  //     }
+  //     setDirection(newDirection);
+  //   }
+  // }, [direction]); // Add direction to dependencies
 
-  const updateGame = useCallback(() => {
-    setSnake(prevSnake => {
-      const newSnake = prevSnake.map(segment => ({ ...segment }));
-      const head = { ...newSnake[0] };
-      const move = DIRECTIONS[direction];
+  // const updateGame = useCallback(() => {
+  //   setSnake(prevSnake => {
+  //     const newSnake = prevSnake.map(segment => ({ ...segment }));
+  //     const head = { ...newSnake[0] };
+  //     const move = DIRECTIONS[direction];
 
-      head.x += move.x;
-      head.y += move.y;
+  //     head.x += move.x;
+  //     head.y += move.y;
 
-      // Check for wall collision
-      if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
-        setIsGameOver(true);
-        return prevSnake; // Don't update snake further
-      }
+  //     // Check for wall collision
+  //     if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
+  //       setIsGameOver(true);
+  //       return prevSnake; // Don't update snake further
+  //     }
 
-      // Check for self-collision (excluding the very tail, which will move away)
-      for (let i = 1; i < newSnake.length -1 ; i++) {
-        if (newSnake[i].x === head.x && newSnake[i].y === head.y) {
-          setIsGameOver(true);
-          return prevSnake; // Don't update snake further
-        }
-      }
+  //     // Check for self-collision (excluding the very tail, which will move away)
+  //     for (let i = 1; i < newSnake.length -1 ; i++) {
+  //       if (newSnake[i].x === head.x && newSnake[i].y === head.y) {
+  //         setIsGameOver(true);
+  //         return prevSnake; // Don't update snake further
+  //       }
+  //     }
 
-      let ateFood = false;
-      if (head.x === food.x && head.y === food.y) {
-        ateFood = true;
-        setScore(s => s + 10); // Increment score
-        setFood(getRandomPosition(newSnake)); // Pass newSnake to avoid spawning on just moved head
-      }
+  //     let ateFood = false;
+  //     if (head.x === food.x && head.y === food.y) {
+  //       ateFood = true;
+  //       setScore(s => s + 10); // Increment score
+  //       setFood(getRandomPosition(newSnake)); // Pass newSnake to avoid spawning on just moved head
+  //     }
 
-      newSnake.unshift(head);
+  //     newSnake.unshift(head);
 
-      if (!ateFood) {
-        newSnake.pop();
-      }
-      return newSnake;
-    });
-  }, [direction, food]); // Removed score from here, setScore is stable
+  //     if (!ateFood) {
+  //       newSnake.pop();
+  //     }
+  //     return newSnake;
+  //   });
+  // }, [direction, food]); // Removed score from here, setScore is stable
 
-  const resetGame = () => {
-    setSnake(initialSnake);
-    setDirection('RIGHT');
-    setFood(getRandomPosition(initialSnake));
-    setScore(0);
-    setIsGameOver(false);
-  };
+  // const resetGame = () => {
+  //   setSnake(initialSnake);
+  //   setDirection('RIGHT');
+  //   setFood(getRandomPosition(initialSnake));
+  //   setScore(0);
+  //   setIsGameOver(false);
+  // };
 
   useDrawCallback((canvas) => {
     canvas.drawColor(Skia.Color(COLORS.black));
@@ -109,50 +109,50 @@ const Game: React.FC = () => {
     canvas.drawPath(gridPath, gridPaint);
   }, [gridPath]);
 
-  useEffect(() => {
-    if (isGameOver) {
-      if (gameLoopIntervalRef.current) {
-        clearInterval(gameLoopIntervalRef.current);
-        gameLoopIntervalRef.current = null;
-      }
-      return;
-    }
+  // useEffect(() => {
+  //   if (isGameOver) {
+  //     if (gameLoopIntervalRef.current) {
+  //       clearInterval(gameLoopIntervalRef.current);
+  //       gameLoopIntervalRef.current = null;
+  //     }
+  //     return;
+  //   }
 
-    // Start or restart the game loop
-    if (!gameLoopIntervalRef.current) {
-        gameLoopIntervalRef.current = setInterval(updateGame, GAME_SPEED_MS);
-    }
+  //   // Start or restart the game loop
+  //   if (!gameLoopIntervalRef.current) {
+  //       gameLoopIntervalRef.current = setInterval(updateGame, GAME_SPEED_MS);
+  //   }
 
-    return () => { // Cleanup on component unmount or before isGameOver changes back to false (if that happens)
-      if (gameLoopIntervalRef.current) {
-        clearInterval(gameLoopIntervalRef.current);
-        gameLoopIntervalRef.current = null;
-      }
-    };
-  }, [updateGame, isGameOver]); // Add isGameOver as a dependency
+  //   return () => { // Cleanup on component unmount or before isGameOver changes back to false (if that happens)
+  //     if (gameLoopIntervalRef.current) {
+  //       clearInterval(gameLoopIntervalRef.current);
+  //       gameLoopIntervalRef.current = null;
+  //     }
+  //   };
+  // }, [updateGame, isGameOver]); // Add isGameOver as a dependency
 
   // Score text paint
-  const scoreTextPaint = Skia.Paint();
-  scoreTextPaint.setColor(Skia.Color(COLORS.white));
-  scoreTextPaint.setStyle(PaintStyle.Fill);
+  // const scoreTextPaint = Skia.Paint();
+  // scoreTextPaint.setColor(Skia.Color(COLORS.white));
+  // scoreTextPaint.setStyle(PaintStyle.Fill);
   // scoreTextPaint.setAntiAlias(true); // Skia does this by default for text
 
   // Game Over text paint
-  const gameOverTextPaint = Skia.Paint();
-  gameOverTextPaint.setColor(Skia.Color(COLORS.red));
-  gameOverTextPaint.setStyle(PaintStyle.Fill);
+  // const gameOverTextPaint = Skia.Paint();
+  // gameOverTextPaint.setColor(Skia.Color(COLORS.red));
+  // gameOverTextPaint.setStyle(PaintStyle.Fill);
   // gameOverTextPaint.setAntiAlias(true);
 
-  let scoreFont = Skia.FontMgr.RefDefault().matchFamilyStyle('monospace');
-  if (!scoreFont) {
-    console.warn("Monospace font not found, attempting to use default system font for score.");
-    scoreFont = Skia.FontMgr.RefDefault().default();
-  }
-  if (!scoreFont) {
-    console.warn("Default system font not found, using basic Skia.Font(). Score text might not render correctly.");
-    // As a last resort, create a basic font object. Text might not be styled as expected.
-    scoreFont = Skia.Font();
-  }
+  // let scoreFont = Skia.FontMgr.RefDefault().matchFamilyStyle('monospace');
+  // if (!scoreFont) {
+  //   console.warn("Monospace font not found, attempting to use default system font for score.");
+  //   scoreFont = Skia.FontMgr.RefDefault().default();
+  // }
+  // if (!scoreFont) {
+  //   console.warn("Default system font not found, using basic Skia.Font(). Score text might not render correctly.");
+  //   // As a last resort, create a basic font object. Text might not be styled as expected.
+  //   scoreFont = Skia.Font();
+  // }
 
 
   return (
@@ -168,15 +168,15 @@ const Game: React.FC = () => {
         />
 
         {/* Food */}
-        <Circle
+        {/* <Circle
           cx={food.x * TILE_SIZE + TILE_SIZE / 2}
           cy={food.y * TILE_SIZE + TILE_SIZE / 2}
           r={TILE_SIZE / 2.5}
           color={COLORS.food}
-        />
+        /> */}
 
         {/* Snake */}
-        {snake.map((segment, index) => (
+        {/* {snake.map((segment, index) => (
           <RoundedRect
             key={index}
             x={segment.x * TILE_SIZE}
@@ -186,21 +186,21 @@ const Game: React.FC = () => {
             r={3}
             color={index === 0 ? COLORS.snakeHead : COLORS.snakeBody}
           />
-        ))}
+        ))} */}
 
         {/* Score Display */}
-        <SkiaText
+        {/* <SkiaText
             x={10}
             y={25} // Adjust y position as needed
             text={`Score: ${score}`}
             font={scoreFont}
             size={20} // Skia text size is different from React Native Text fontSize
             paint={scoreTextPaint}
-        />
+        /> */}
         </Group>
       </Canvas>
 
-      {isGameOver && (
+      {/* {isGameOver && (
         <View style={styles.gameOverOverlay}>
           <Text style={styles.gameOverText}>Game Over</Text>
           <Text style={styles.finalScoreText}>Final Score: {score}</Text>
@@ -208,13 +208,13 @@ const Game: React.FC = () => {
             <Text style={styles.replayButtonText}>Replay</Text>
           </TouchableOpacity>
         </View>
-      )}
+      )} */}
 
-      {!isGameOver && (
+      {/* {!isGameOver && (
         <View style={styles.joystickContainer}>
           <Joystick size={150} onDirectionChange={handleDirectionChange} currentDirection={direction} />
         </View>
-      )}
+      )} */}
     </View>
   );
 };
