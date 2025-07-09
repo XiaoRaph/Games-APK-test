@@ -1,7 +1,18 @@
-export const TILE_SIZE = 20;
-export const GRID_SIZE = 20; // Assuming a 20x20 grid
-export const CANVAS_WIDTH = TILE_SIZE * GRID_SIZE;
-export const CANVAS_HEIGHT = TILE_SIZE * GRID_SIZE;
+import { Dimensions } from 'react-native';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+// Canvas will be a square, taking 90% of the smaller screen dimension
+const smallerScreenDimension = Math.min(screenWidth, screenHeight);
+export const CANVAS_SIZE = smallerScreenDimension * 0.9;
+
+export const CANVAS_WIDTH = CANVAS_SIZE;
+export const CANVAS_HEIGHT = CANVAS_SIZE;
+
+export const GRID_SIZE = 20; // We want a 20x20 grid
+
+// Adjust TILE_SIZE so that the GRID_SIZE x GRID_SIZE grid fits perfectly into the CANVAS_SIZE
+export const TILE_SIZE = CANVAS_SIZE / GRID_SIZE;
 
 export const COLORS = {
   black: '#000000',

@@ -143,8 +143,16 @@ const Game: React.FC = () => {
   gameOverTextPaint.setStyle(PaintStyle.Fill);
   // gameOverTextPaint.setAntiAlias(true);
 
-  const scoreFont = Skia.FontMgr.RefDefault().matchFamilyStyle('monospace'); // Or your preferred font
-  if (!scoreFont) throw new Error("Default font not found");
+  let scoreFont = Skia.FontMgr.RefDefault().matchFamilyStyle('monospace');
+  if (!scoreFont) {
+    console.warn("Monospace font not found, attempting to use default system font for score.");
+    scoreFont = Skia.FontMgr.RefDefault().default();
+  }
+  if (!scoreFont) {
+    console.warn("Default system font not found, using basic Skia.Font(). Score text might not render correctly.");
+    // As a last resort, create a basic font object. Text might not be styled as expected.
+    scoreFont = Skia.Font();
+  }
 
 
   return (
