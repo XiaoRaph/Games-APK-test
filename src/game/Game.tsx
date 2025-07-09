@@ -9,10 +9,11 @@ import { View, StyleSheet,
 } from 'react-native'; // Import Text and TouchableOpacity
 import { Canvas,
   RoundedRect,
-  Path, Skia, useDrawCallback,
+  Path, Skia,
+  // useDrawCallback, // No longer needed for grid
   Circle,
-  Text as SkiaText,
-  PaintStyle,
+  // Text as SkiaText,
+  // PaintStyle,
   Group } from '@shopify/react-native-skia';
 import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE,
   GAME_SPEED_MS,
@@ -23,7 +24,7 @@ import { Snake as SnakeType,
   Direction,
   Food
 } from '../types';
-// import Joystick from '../components/Joystick';
+// import Joystick from '../components/Joystick'; // Keep commented for now
 
 const getRandomPosition = (snakeBody: SnakeType): Coordinates => {
   let position: Coordinates;
@@ -59,19 +60,16 @@ const Game: React.FC = () => {
     gridPath.lineTo(CANVAS_WIDTH, i * TILE_SIZE);
   }
 
-  // const handleDirectionChange = useCallback((newDirection: Direction | null) => {
+  // const handleDirectionChange = useCallback((newDirection: Direction | null) => { // Keep commented for now
   //   if (newDirection) {
-  //     // Basic check to prevent immediate 180-degree turns.
-  //     // More sophisticated logic might be needed in Joystick or here.
   //     const currentMove = DIRECTIONS[direction];
   //     const newMove = DIRECTIONS[newDirection];
   //     if (currentMove.x + newMove.x === 0 && currentMove.y + newMove.y === 0) {
-  //       // Trying to move directly opposite
   //       return;
   //     }
   //     setDirection(newDirection);
   //   }
-  // }, [direction]); // Add direction to dependencies
+  // }, [direction]);
 
   const updateGame = useCallback(() => {
     setSnake(prevSnake => {
@@ -85,14 +83,14 @@ const Game: React.FC = () => {
       // Check for wall collision
       if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
         // setIsGameOver(true); // Temporarily commented
-        return prevSnake; // Don't update snake further
+        return prevSnake;
       }
 
-      // Check for self-collision (excluding the very tail, which will move away)
-      // for (let i = 1; i < newSnake.length -1 ; i++) {
+      // Check for self-collision
+      // for (let i = 1; i < newSnake.length -1 ; i++) { // Temporarily commented
       //   if (newSnake[i].x === head.x && newSnake[i].y === head.y) {
-      //     setIsGameOver(true); // Temporarily commented
-      //     return prevSnake; // Don't update snake further
+      //     // setIsGameOver(true);
+      //     return prevSnake;
       //   }
       // }
 
@@ -106,28 +104,19 @@ const Game: React.FC = () => {
       newSnake.unshift(head);
 
       if (!ateFood) {
-        newSnake.pop();
+         newSnake.pop();
       }
       return newSnake;
     });
-  }, [direction, food, score]); // Added food and score to dependencies, setScore is stable
+  }, [direction, food, score]);
 
-  // const resetGame = () => {
+  // const resetGame = () => { // Keep commented for now
   //   setSnake(initialSnake);
   //   setDirection('RIGHT');
   //   setFood(getRandomPosition(initialSnake));
-  //   setScore(0);
-  //   setIsGameOver(false);
+  //   // setScore(0);
+  //   // setIsGameOver(false);
   // };
-
-  // useDrawCallback((canvas) => {
-  //   // canvas.drawColor(Skia.Color(COLORS.black)); // This will be handled by the View's background or Canvas style
-  //   const gridPaint = Skia.Paint();
-  //   gridPaint.setColor(Skia.Color(COLORS.grey));
-  //   gridPaint.setStyle(Skia.PaintStyle.Stroke);
-  //   gridPaint.setStrokeWidth(0.5);
-  //   // canvas.drawPath(gridPath, gridPaint); // This is done declaratively below
-  // }, [gridPath]);
 
   useEffect(() => {
     // if (isGameOver) { // Temporarily commented
@@ -138,41 +127,26 @@ const Game: React.FC = () => {
     //   return;
     // }
 
-    // Start or restart the game loop
     if (!gameLoopIntervalRef.current) {
         gameLoopIntervalRef.current = setInterval(updateGame, GAME_SPEED_MS);
     }
 
-    return () => { // Cleanup on component unmount or before isGameOver changes back to false (if that happens)
+    return () => {
       if (gameLoopIntervalRef.current) {
         clearInterval(gameLoopIntervalRef.current);
         gameLoopIntervalRef.current = null;
       }
     };
-  }, [updateGame]); // isGameOver dependency will be added back
+  // }, [updateGame, isGameOver]); // isGameOver dependency will be added back
+  }, [updateGame]);
 
-  // Score text paint
-  const scoreTextPaint = Skia.Paint();
-  scoreTextPaint.setColor(Skia.Color(COLORS.white));
-  scoreTextPaint.setStyle(PaintStyle.Fill);
-  // scoreTextPaint.setAntiAlias(true); // Skia does this by default for text
-
-  // Game Over text paint
-  // const gameOverTextPaint = Skia.Paint();
-  // gameOverTextPaint.setColor(Skia.Color(COLORS.red));
-  // gameOverTextPaint.setStyle(PaintStyle.Fill);
-  // gameOverTextPaint.setAntiAlias(true);
-
-  let scoreFont = Skia.FontMgr.RefDefault().matchFamilyStyle('monospace');
-  if (!scoreFont) {
-    console.warn("Monospace font not found, attempting to use default system font for score.");
-    scoreFont = Skia.FontMgr.RefDefault().default();
-  }
-  if (!scoreFont) {
-    console.warn("Default system font not found, using basic Skia.Font(). Score text might not render correctly.");
-    // As a last resort, create a basic font object. Text might not be styled as expected.
-    scoreFont = Skia.Font();
-  }
+  // Score text paint & font will be uncommented later
+  // const scoreTextPaint = Skia.Paint();
+  // scoreTextPaint.setColor(Skia.Color(COLORS.white));
+  // scoreTextPaint.setStyle(PaintStyle.Fill);
+  // let scoreFont = Skia.FontMgr.RefDefault().matchFamilyStyle('monospace');
+  // if (!scoreFont) scoreFont = Skia.FontMgr.RefDefault().default();
+  // if (!scoreFont) scoreFont = Skia.Font();
 
 
   return (
@@ -208,18 +182,19 @@ const Game: React.FC = () => {
           />
         ))}
 
-        {/* Score Display */}
-        <SkiaText
+        {/* Score Display will be uncommented later */}
+        {/* <SkiaText
             x={10}
-            y={25} // Adjust y position as needed
+            y={25}
             text={`Score: ${score}`}
             font={scoreFont}
-            size={20} // Skia text size is different from React Native Text fontSize
+            size={20}
             paint={scoreTextPaint}
-        />
+        /> */}
         </Group>
       </Canvas>
 
+      {/* Game Over UI will be uncommented later */}
       {/* {isGameOver && (
         <View style={styles.gameOverOverlay}>
           <Text style={styles.gameOverText}>Game Over</Text>
@@ -230,6 +205,7 @@ const Game: React.FC = () => {
         </View>
       )} */}
 
+      {/* Joystick UI will be uncommented later */}
       {/* {!isGameOver && (
         <View style={styles.joystickContainer}>
           <Joystick size={150} onDirectionChange={handleDirectionChange} currentDirection={direction} />
@@ -246,13 +222,13 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
-    backgroundColor: COLORS.black, // Match canvas background if it's not covering fully
+    backgroundColor: COLORS.black,
   },
-  joystickContainer: {
+  joystickContainer: { // Keep for later
     position: 'absolute',
     bottom: 30,
   },
-  gameOverOverlay: {
+  gameOverOverlay: { // Keep for later
     position: 'absolute',
     width: '100%',
     height: '100%',
@@ -260,24 +236,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  gameOverText: {
+  gameOverText: { // Keep for later
     fontSize: 48,
     fontWeight: 'bold',
     color: COLORS.red,
     marginBottom: 20,
   },
-  finalScoreText: {
+  finalScoreText: { // Keep for later
     fontSize: 24,
     color: COLORS.white,
     marginBottom: 30,
   },
-  replayButton: {
-    backgroundColor: COLORS.blue, // Or any color you prefer
+  replayButton: { // Keep for later
+    backgroundColor: COLORS.blue,
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 10,
   },
-  replayButtonText: {
+  replayButtonText: { // Keep for later
     color: COLORS.white,
     fontSize: 18,
     fontWeight: 'bold',
