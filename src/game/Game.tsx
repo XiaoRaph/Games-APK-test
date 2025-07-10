@@ -140,9 +140,9 @@ const Game: React.FC = () => {
   }, [updateGame, isGameOver]); // Add isGameOver as a dependency
 
   // Score text paint
-  const scoreTextPaint = Skia.Paint();
-  scoreTextPaint.setColor(Skia.Color(COLORS.white));
-  scoreTextPaint.setStyle(PaintStyle.Fill);
+  // const scoreTextPaint = Skia.Paint(); // Original declaration, now replaced by useMemo version
+  // scoreTextPaint.setColor(Skia.Color(COLORS.white));
+  // scoreTextPaint.setStyle(PaintStyle.Fill);
   // scoreTextPaint.setAntiAlias(true); // Skia does this by default for text
 
   const scoreTextPaint = useMemo(() => {
