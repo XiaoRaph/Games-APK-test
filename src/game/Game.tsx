@@ -108,13 +108,13 @@ const Game: React.FC = () => {
       }
       return newSnake;
     });
-  }, [direction, food, score]);
+  }, [direction, food]); // score is not needed here as setScore uses callback form
 
   // const resetGame = () => { // Keep commented for now
   //   setSnake(initialSnake);
   //   setDirection('RIGHT');
   //   setFood(getRandomPosition(initialSnake));
-  //   // setScore(0);
+  //   setScore(0); // setScore to 0
   //   // setIsGameOver(false);
   // };
 
@@ -140,19 +140,31 @@ const Game: React.FC = () => {
   // }, [updateGame, isGameOver]); // isGameOver dependency will be added back
   }, [updateGame]);
 
-  // Score text paint & font
+  // Score text paint & font initialization
   const scoreTextPaint = Skia.Paint();
   scoreTextPaint.setColor(Skia.Color(COLORS.white));
   scoreTextPaint.setStyle(PaintStyle.Fill);
-  let scoreFont = Skia.FontMgr.RefDefault().matchFamilyStyle('monospace');
-  if (!scoreFont) {
-    console.warn("Monospace font not found, using default.");
-    scoreFont = Skia.FontMgr.RefDefault().default();
+
+  let scoreFont: Skia.Font;
+  const defaultFontMgr = Skia.FontMgr.RefDefault();
+  const monoTypeface = defaultFontMgr.matchFamilyStyle('monospace');
+
+  if (monoTypeface) {
+    scoreFont = Skia.Font(monoTypeface, 20);
+  } else {
+    console.warn("Monospace font not found, attempting to use default system font for score.");
+    const defaultTypeface = defaultFontMgr.default();
+    if (defaultTypeface) {
+      scoreFont = Skia.Font(defaultTypeface, 20);
+    } else {
+      console.warn("Default system font not found, using basic Skia.Font(). Score text might not render with specific style.");
+      // As a last resort, create a basic font object. Text might not be styled as expected.
+      // Providing a size is important for Skia.Font() when no typeface is given.
+      scoreFont = Skia.Font(null, 20);
+    }
   }
-  if (!scoreFont) {
-    console.warn("Default font not found, using basic Skia.Font().");
-    scoreFont = Skia.Font();
-  }
+  // Ensure scoreFont is always non-null, even if it's a very basic fallback.
+  // The Skia.Font(null, size) constructor should provide a very basic font.
 
 
   return (
@@ -194,7 +206,7 @@ const Game: React.FC = () => {
             y={25}
             text={`Score: ${score}`}
             font={scoreFont}
-            size={20}
+            // size={20} // Size is now set during font creation, so not needed here explicitly
             paint={scoreTextPaint}
         />
         </Group>
