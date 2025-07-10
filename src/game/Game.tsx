@@ -145,26 +145,30 @@ const Game: React.FC = () => {
   scoreTextPaint.setColor(Skia.Color(COLORS.white));
   scoreTextPaint.setStyle(PaintStyle.Fill);
 
-  let scoreFont: Skia.Font;
-  const defaultFontMgr = Skia.FontMgr.RefDefault();
-  const monoTypeface = defaultFontMgr.matchFamilyStyle('monospace');
+  let scoreFont: Skia.Font | null = null; // Initialize as null
 
-  if (monoTypeface) {
-    scoreFont = Skia.Font(monoTypeface, 20);
-  } else {
-    console.warn("Monospace font not found, attempting to use default system font for score.");
-    const defaultTypeface = defaultFontMgr.default();
-    if (defaultTypeface) {
-      scoreFont = Skia.Font(defaultTypeface, 20);
+  try {
+    const defaultFontMgr = Skia.FontMgr.RefDefault();
+    if (defaultFontMgr) {
+      const monoTypeface = defaultFontMgr.matchFamilyStyle('monospace');
+      if (monoTypeface) {
+        scoreFont = Skia.Font(monoTypeface, 20);
+      } else {
+        console.warn("Monospace font not found, attempting to use default system font for score.");
+        const defaultTypeface = defaultFontMgr.default();
+        if (defaultTypeface) {
+          scoreFont = Skia.Font(defaultTypeface, 20);
+        } else {
+          console.warn("Default system font also not found. Score will not be displayed.");
+        }
+      }
     } else {
-      console.warn("Default system font not found, using basic Skia.Font(). Score text might not render with specific style.");
-      // As a last resort, create a basic font object. Text might not be styled as expected.
-      // Providing a size is important for Skia.Font() when no typeface is given.
-      scoreFont = Skia.Font(null, 20);
+      console.warn("Default Font Manager not available. Score will not be displayed.");
     }
+  } catch (error) {
+    console.error("Error loading font for score:", error);
+    // scoreFont remains null
   }
-  // Ensure scoreFont is always non-null, even if it's a very basic fallback.
-  // The Skia.Font(null, size) constructor should provide a very basic font.
 
 
   return (
@@ -201,14 +205,16 @@ const Game: React.FC = () => {
         ))}
 
         {/* Score Display */}
-        <SkiaText
-            x={10}
-            y={25}
-            text={`Score: ${score}`}
-            font={scoreFont}
-            // size={20} // Size is now set during font creation, so not needed here explicitly
-            paint={scoreTextPaint}
-        />
+        {scoreFont && ( // Conditional rendering based on scoreFont
+          <SkiaText
+              x={10}
+              y={25}
+              text={`Score: ${score}`}
+              font={scoreFont}
+              // size is part of font creation
+              paint={scoreTextPaint}
+          />
+        )}
         </Group>
       </Canvas>
 
