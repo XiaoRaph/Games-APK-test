@@ -6,8 +6,8 @@ import { View, StyleSheet,
 import { Canvas, RoundedRect, Path, Skia,
   // useDrawCallback, // Already removed
   Circle,
-  Text as SkiaText,
-  PaintStyle,
+  // Text as SkiaText, // Logic for score display commented out
+  // PaintStyle, // Logic for score display commented out
   Group } from '@shopify/react-native-skia';
 import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE, GAME_SPEED_MS, DIRECTIONS } from '../constants/gameConstants';
 import { Snake as SnakeType, Coordinates, Direction, Food } from '../types';
@@ -145,12 +145,12 @@ const Game: React.FC = () => {
   // scoreTextPaint.setStyle(PaintStyle.Fill);
   // scoreTextPaint.setAntiAlias(true); // Skia does this by default for text
 
-  const scoreTextPaint = useMemo(() => {
-    const paint = Skia.Paint();
-    paint.setColor(Skia.Color(COLORS.white));
-    paint.setStyle(PaintStyle.Fill);
-    return paint;
-  }, []);
+  // const scoreTextPaint = useMemo(() => { // Commenting out score display logic
+  //   const paint = Skia.Paint();
+  //   paint.setColor(Skia.Color(COLORS.white));
+  //   paint.setStyle(PaintStyle.Fill);
+  //   return paint;
+  // }, []);
 
   // Game Over text paint
   const gameOverTextPaint = Skia.Paint(); // This will also be memoized later if Game Over UI is added
@@ -158,39 +158,39 @@ const Game: React.FC = () => {
   gameOverTextPaint.setStyle(PaintStyle.Fill);
   // gameOverTextPaint.setAntiAlias(true);
 
-  const scoreFont: Skia.Font | null = useMemo(() => {
-    try {
-      const defaultFontMgr = Skia.FontMgr.RefDefault();
-      if (defaultFontMgr) {
-        let typeface = defaultFontMgr.matchFamilyStyle('monospace');
-        if (!typeface) {
-          console.warn("Monospace font not found, trying Roboto.");
-          typeface = defaultFontMgr.matchFamilyStyle('Roboto');
-        }
-        if (!typeface) {
-          console.warn("Roboto font not found, trying sans-serif.");
-          typeface = defaultFontMgr.matchFamilyStyle('sans-serif');
-        }
-        if (!typeface) {
-          console.warn("Sans-serif font not found, trying default system font.");
-          typeface = defaultFontMgr.default();
-        }
+  // const scoreFont: Skia.Font | null = useMemo(() => { // Commenting out score display logic
+  //   try {
+  //     const defaultFontMgr = Skia.FontMgr.RefDefault();
+  //     if (defaultFontMgr) {
+  //       let typeface = defaultFontMgr.matchFamilyStyle('monospace');
+  //       if (!typeface) {
+  //         console.warn("Monospace font not found, trying Roboto.");
+  //         typeface = defaultFontMgr.matchFamilyStyle('Roboto');
+  //       }
+  //       if (!typeface) {
+  //         console.warn("Roboto font not found, trying sans-serif.");
+  //         typeface = defaultFontMgr.matchFamilyStyle('sans-serif');
+  //       }
+  //       if (!typeface) {
+  //         console.warn("Sans-serif font not found, trying default system font.");
+  //         typeface = defaultFontMgr.default();
+  //       }
 
-        if (typeface) {
-          return Skia.Font(typeface, 20);
-        } else {
-          console.warn("No suitable system font found for score. Score will not be displayed.");
-          return null;
-        }
-      } else {
-        console.warn("Default Font Manager not available. Score will not be displayed.");
-        return null;
-      }
-    } catch (error) {
-      console.error("Error loading font for score:", error);
-      return null;
-    }
-  }, []);
+  //       if (typeface) {
+  //         return Skia.Font(typeface, 20);
+  //       } else {
+  //         console.warn("No suitable system font found for score. Score will not be displayed.");
+  //         return null;
+  //       }
+  //     } else {
+  //       console.warn("Default Font Manager not available. Score will not be displayed.");
+  //       return null;
+  //     }
+  //   } catch (error) {
+  //     console.error("Error loading font for score:", error);
+  //     return null;
+  //   }
+  // }, []);
 
 
   return (
@@ -227,7 +227,7 @@ const Game: React.FC = () => {
         ))}
 
         {/* Score Display */}
-        {scoreFont && (
+        {/* {scoreFont && ( // Commenting out score display logic
             <SkiaText
                 x={10}
                 y={25} // Adjust y position as needed
@@ -236,7 +236,7 @@ const Game: React.FC = () => {
                 // size is managed by Skia.Font constructor
                 paint={scoreTextPaint}
             />
-        )}
+        )} */}
         </Group>
       </Canvas>
 
