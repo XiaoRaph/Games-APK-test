@@ -12,8 +12,8 @@ import { Canvas,
   Path, Skia,
   // useDrawCallback, // No longer needed for grid
   Circle,
-  // Text as SkiaText,
-  // PaintStyle,
+  Text as SkiaText,
+  PaintStyle,
   Group } from '@shopify/react-native-skia';
 import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE,
   GAME_SPEED_MS,
@@ -140,13 +140,19 @@ const Game: React.FC = () => {
   // }, [updateGame, isGameOver]); // isGameOver dependency will be added back
   }, [updateGame]);
 
-  // Score text paint & font will be uncommented later
-  // const scoreTextPaint = Skia.Paint();
-  // scoreTextPaint.setColor(Skia.Color(COLORS.white));
-  // scoreTextPaint.setStyle(PaintStyle.Fill);
-  // let scoreFont = Skia.FontMgr.RefDefault().matchFamilyStyle('monospace');
-  // if (!scoreFont) scoreFont = Skia.FontMgr.RefDefault().default();
-  // if (!scoreFont) scoreFont = Skia.Font();
+  // Score text paint & font
+  const scoreTextPaint = Skia.Paint();
+  scoreTextPaint.setColor(Skia.Color(COLORS.white));
+  scoreTextPaint.setStyle(PaintStyle.Fill);
+  let scoreFont = Skia.FontMgr.RefDefault().matchFamilyStyle('monospace');
+  if (!scoreFont) {
+    console.warn("Monospace font not found, using default.");
+    scoreFont = Skia.FontMgr.RefDefault().default();
+  }
+  if (!scoreFont) {
+    console.warn("Default font not found, using basic Skia.Font().");
+    scoreFont = Skia.Font();
+  }
 
 
   return (
@@ -182,15 +188,15 @@ const Game: React.FC = () => {
           />
         ))}
 
-        {/* Score Display will be uncommented later */}
-        {/* <SkiaText
+        {/* Score Display */}
+        <SkiaText
             x={10}
             y={25}
             text={`Score: ${score}`}
             font={scoreFont}
             size={20}
             paint={scoreTextPaint}
-        /> */}
+        />
         </Group>
       </Canvas>
 
