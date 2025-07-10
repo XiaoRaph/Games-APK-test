@@ -1,9 +1,30 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native'; // Import Text and TouchableOpacity
-import { Canvas, RoundedRect, Path, Skia, useDrawCallback, Circle, Text as SkiaText, PaintStyle, Group } from '@shopify/react-native-skia';
-import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE, GAME_SPEED_MS, DIRECTIONS } from '../constants/gameConstants';
-import { Snake as SnakeType, Coordinates, Direction, Food } from '../types';
-import Joystick from '../components/Joystick';
+import React, {
+  useState,
+  useEffect,
+  useCallback
+} from 'react';
+import { View, StyleSheet,
+  // Text, // Commented out for now
+  // TouchableOpacity // Commented out for now
+} from 'react-native';
+import { Canvas,
+  RoundedRect,
+  Path, Skia,
+  // useDrawCallback, // No longer needed for grid
+  Circle,
+  // Text as SkiaText, // Commented out for now
+  // PaintStyle, // Commented out for now
+  Group } from '@shopify/react-native-skia';
+import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE,
+  GAME_SPEED_MS,
+  DIRECTIONS
+} from '../constants/gameConstants';
+import { Snake as SnakeType,
+  Coordinates,
+  Direction,
+  Food
+} from '../types';
+// import Joystick from '../components/Joystick'; // Commented out for now
 
 const getRandomPosition = (snakeBody: SnakeType): Coordinates => {
   let position: Coordinates;
@@ -25,7 +46,7 @@ const Game: React.FC = () => {
   const [snake, setSnake] = useState<SnakeType>(initialSnake);
   const [direction, setDirection] = useState<Direction>('RIGHT');
   const [food, setFood] = useState<Food>(getRandomPosition(initialSnake));
-  const [score, setScore] = useState<number>(0);
+  const [score, setScore] = useState<number>(0); // Keep for game logic
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const gameLoopIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
@@ -92,22 +113,22 @@ const Game: React.FC = () => {
     });
   }, [direction, food]); // Removed score from here, setScore is stable
 
-  const resetGame = () => {
-    setSnake(initialSnake);
-    setDirection('RIGHT');
-    setFood(getRandomPosition(initialSnake));
-    setScore(0);
-    setIsGameOver(false);
-  };
+  // const resetGame = () => { // Commented out for now
+  //   setSnake(initialSnake);
+  //   setDirection('RIGHT');
+  //   setFood(getRandomPosition(initialSnake));
+  //   setScore(0);
+  //   // setIsGameOver(false); // Commented out for now
+  // };
 
-  useDrawCallback((canvas) => {
-    canvas.drawColor(Skia.Color(COLORS.black));
-    const gridPaint = Skia.Paint();
-    gridPaint.setColor(Skia.Color(COLORS.grey));
-    gridPaint.setStyle(Skia.PaintStyle.Stroke);
-    gridPaint.setStrokeWidth(0.5);
-    canvas.drawPath(gridPath, gridPaint);
-  }, [gridPath]);
+  // useDrawCallback((canvas) => { // This was removed earlier as grid is drawn declaratively
+  //   canvas.drawColor(Skia.Color(COLORS.black));
+  //   const gridPaint = Skia.Paint();
+  //   gridPaint.setColor(Skia.Color(COLORS.grey));
+  //   gridPaint.setStyle(Skia.PaintStyle.Stroke);
+  //   gridPaint.setStrokeWidth(0.5);
+  //   canvas.drawPath(gridPath, gridPaint);
+  // }, [gridPath]);
 
   useEffect(() => {
     if (isGameOver) {
@@ -129,7 +150,7 @@ const Game: React.FC = () => {
         gameLoopIntervalRef.current = null;
       }
     };
-  }, [updateGame, isGameOver]); // Add isGameOver as a dependency
+  }, [updateGame, isGameOver]);
 
   // Score text paint
   const scoreTextPaint = Skia.Paint();
@@ -138,41 +159,21 @@ const Game: React.FC = () => {
   // scoreTextPaint.setAntiAlias(true); // Skia does this by default for text
 
   // Game Over text paint
-  const gameOverTextPaint = Skia.Paint();
-  gameOverTextPaint.setColor(Skia.Color(COLORS.red));
-  gameOverTextPaint.setStyle(PaintStyle.Fill);
+  // const gameOverTextPaint = Skia.Paint(); // Commented out for now
+  // gameOverTextPaint.setColor(Skia.Color(COLORS.red));
+  // gameOverTextPaint.setStyle(PaintStyle.Fill);
   // gameOverTextPaint.setAntiAlias(true);
 
-  let scoreFont: Skia.Font | null = null;
-  try {
-    const defaultFontMgr = Skia.FontMgr.RefDefault();
-    if (defaultFontMgr) {
-      let typeface = defaultFontMgr.matchFamilyStyle('monospace');
-      if (!typeface) {
-        console.warn("Monospace font not found, trying Roboto.");
-        typeface = defaultFontMgr.matchFamilyStyle('Roboto');
-      }
-      if (!typeface) {
-        console.warn("Roboto font not found, trying sans-serif.");
-        typeface = defaultFontMgr.matchFamilyStyle('sans-serif');
-      }
-      if (!typeface) {
-        console.warn("Sans-serif font not found, trying default system font.");
-        typeface = defaultFontMgr.default();
-      }
-
-      if (typeface) {
-        scoreFont = Skia.Font(typeface, 20);
-      } else {
-        console.warn("No suitable system font found. Score will not be displayed.");
-      }
-    } else {
-      console.warn("Default Font Manager not available. Score will not be displayed.");
-    }
-  } catch (error) {
-    console.error("Error loading font for score:", error);
-    // scoreFont remains null
-  }
+  // let scoreFont = Skia.FontMgr.RefDefault().matchFamilyStyle('monospace'); // Commented out for now
+  // if (!scoreFont) {
+  //   console.warn("Monospace font not found, attempting to use default system font for score.");
+  //   scoreFont = Skia.FontMgr.RefDefault().default();
+  // }
+  // if (!scoreFont) {
+  //   console.warn("Default system font not found, using basic Skia.Font(). Score text might not render correctly.");
+  //   // As a last resort, create a basic font object. Text might not be styled as expected.
+  //   scoreFont = Skia.Font();
+  // }
 
 
   return (
@@ -209,20 +210,18 @@ const Game: React.FC = () => {
         ))}
 
         {/* Score Display */}
-        {scoreFont && (
-            <SkiaText
-                x={10}
-                y={25} // Adjust y position as needed
-                text={`Score: ${score}`}
-                font={scoreFont}
-                // size is managed by Skia.Font constructor
-                paint={scoreTextPaint}
-            />
-        )}
+        {/* <SkiaText // Commented out for now
+            x={10}
+            y={25} // Adjust y position as needed
+            text={`Score: ${score}`}
+            font={scoreFont}
+            size={20} // Skia text size is different from React Native Text fontSize
+            paint={scoreTextPaint}
+        /> */}
         </Group>
       </Canvas>
 
-      {isGameOver && (
+      {/* {isGameOver && ( // Commented out for now
         <View style={styles.gameOverOverlay}>
           <Text style={styles.gameOverText}>Game Over</Text>
           <Text style={styles.finalScoreText}>Final Score: {score}</Text>
@@ -230,13 +229,13 @@ const Game: React.FC = () => {
             <Text style={styles.replayButtonText}>Replay</Text>
           </TouchableOpacity>
         </View>
-      )}
+      )} */}
 
-      {!isGameOver && (
+      {/* {!isGameOver && ( // Commented out for now
         <View style={styles.joystickContainer}>
           <Joystick size={150} onDirectionChange={handleDirectionChange} currentDirection={direction} />
         </View>
-      )}
+      )} */}
     </View>
   );
 };
