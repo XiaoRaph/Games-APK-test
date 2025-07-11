@@ -39,6 +39,34 @@ const Joystick: React.FC<JoystickProps> = ({ size, onDirectionChange, currentDir
     return { x: touchX.value, y: touchY.value };
   }, [touchX, touchY, isActive]); // Rerun when touchX, touchY or isActive changes
 
+  // Memoized updateDirection function
+  const updateDirection = React.useCallback((x: number, y: number) => {
+    const dx = x - center.x;
+    const dy = y - center.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance < DEAD_ZONE_RADIUS) {
+      return; // Input is within the dead zone
+    }
+
+    let newDirection: Direction | null = null;
+    if (Math.abs(dx) > Math.abs(dy)) { // More horizontal movement
+      if (dx > 0) newDirection = 'RIGHT';
+      else newDirection = 'LEFT';
+    } else { // More vertical movement
+      if (dy > 0) newDirection = 'DOWN';
+      else newDirection = 'UP';
+    }
+
+    if (newDirection) {
+        if (currentDirection === 'UP' && newDirection === 'DOWN') return;
+        if (currentDirection === 'DOWN' && newDirection === 'UP') return;
+        if (currentDirection === 'LEFT' && newDirection === 'RIGHT') return;
+        if (currentDirection === 'RIGHT' && newDirection === 'LEFT') return;
+        onDirectionChange(newDirection);
+    }
+  }, [center.x, center.y, DEAD_ZONE_RADIUS, currentDirection, onDirectionChange]);
+
   const touchHandler = useTouchHandler({
     onStart: (event) => {
       isActive.value = true;
@@ -57,42 +85,9 @@ const Joystick: React.FC<JoystickProps> = ({ size, onDirectionChange, currentDir
       isActive.value = false;
       touchX.value = center.x; // Reset stick to center
       touchY.value = center.y;
-      // Optionally, you might want to set direction to null or keep last direction
-      // onDirectionChange(null); // Uncomment if you want to stop movement on release
+      // onDirectionChange(null); // Optional: stop movement on release
     },
-  });
-
-  const updateDirection = (x: number, y: number) => {
-    const dx = x - center.x;
-    const dy = y - center.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    if (distance < DEAD_ZONE_RADIUS) {
-      // Optionally, could call onDirectionChange(null) if snake should stop
-      return; // Input is within the dead zone
-    }
-
-    const angle = Math.atan2(dy, dx); // Angle in radians
-    let newDirection: Direction | null = null;
-
-    // Determine direction based on angle
-    if (Math.abs(dx) > Math.abs(dy)) { // More horizontal movement
-      if (dx > 0) newDirection = 'RIGHT';
-      else newDirection = 'LEFT';
-    } else { // More vertical movement
-      if (dy > 0) newDirection = 'DOWN';
-      else newDirection = 'UP';
-    }
-
-    // Prevent moving directly opposite to current direction
-    if (newDirection) {
-        if (currentDirection === 'UP' && newDirection === 'DOWN') return;
-        if (currentDirection === 'DOWN' && newDirection === 'UP') return;
-        if (currentDirection === 'LEFT' && newDirection === 'RIGHT') return;
-        if (currentDirection === 'RIGHT' && newDirection === 'LEFT') return;
-        onDirectionChange(newDirection);
-    }
-  };
+  }, [updateDirection]); // Add memoized updateDirection to touchHandler dependencies
 
   // Base of the joystick
   const baseOuterPath = Skia.Path.Make();
