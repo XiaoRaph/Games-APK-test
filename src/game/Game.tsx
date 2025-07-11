@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet,
-  // Text, // Will be uncommented later
-  // TouchableOpacity // Will be uncommented later
+  Text,
+  TouchableOpacity
 } from 'react-native';
 import { Canvas, RoundedRect, Path, Skia,
   // useDrawCallback, // Already removed
@@ -246,11 +246,11 @@ const Game: React.FC = () => {
 
       {isGameOver && (
         <View style={styles.gameOverOverlay}>
-          {/* <Text style={styles.gameOverText}>Game Over</Text> */}
-          {/* <Text style={styles.finalScoreText}>Final Score: {score}</Text> */}
-          {/* <TouchableOpacity style={styles.replayButton} onPress={resetGame}>
+          <Text style={styles.gameOverText}>Game Over</Text>
+          <Text style={styles.finalScoreText}>Final Score: {score}</Text>
+          <TouchableOpacity style={styles.replayButton} onPress={resetGame}>
             <Text style={styles.replayButtonText}>Replay</Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
       )}
 
