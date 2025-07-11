@@ -108,14 +108,14 @@ const Game: React.FC = () => {
     setIsGameOver(false);
   };
 
-  useDrawCallback((canvas) => {
-    canvas.drawColor(Skia.Color(COLORS.black));
-    const gridPaint = Skia.Paint();
-    gridPaint.setColor(Skia.Color(COLORS.grey));
-    gridPaint.setStyle(Skia.PaintStyle.Stroke);
-    gridPaint.setStrokeWidth(0.5);
-    canvas.drawPath(gridPath, gridPaint);
-  }, [gridPath]);
+  // useDrawCallback((canvas) => {
+  //   canvas.drawColor(Skia.Color(COLORS.black));
+  //   const gridPaint = Skia.Paint();
+  //   gridPaint.setColor(Skia.Color(COLORS.grey));
+  //   gridPaint.setStyle(Skia.PaintStyle.Stroke);
+  //   gridPaint.setStrokeWidth(0.5);
+  //   canvas.drawPath(gridPath, gridPaint);
+  // }, [gridPath]);
 
   useEffect(() => {
     if (isGameOver) {
