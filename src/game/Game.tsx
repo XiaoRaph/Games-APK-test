@@ -11,7 +11,7 @@ import { Canvas, RoundedRect, Path, Skia,
   Group } from '@shopify/react-native-skia';
 import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE, GAME_SPEED_MS, DIRECTIONS } from '../constants/gameConstants';
 import { Snake as SnakeType, Coordinates, Direction, Food } from '../types';
-// import Joystick from '../components/Joystick'; // Will be uncommented later
+import Joystick from '../components/Joystick'; // Will be uncommented later
 
 const getRandomPosition = (snakeBody: SnakeType): Coordinates => {
   let position: Coordinates;
@@ -254,11 +254,11 @@ const Game: React.FC = () => {
         </View>
       )}
 
-      {/* {!isGameOver && (
+      {!isGameOver && (
         <View style={styles.joystickContainer}>
           <Joystick size={150} onDirectionChange={handleDirectionChange} currentDirection={direction} />
         </View>
-      )} */}
+      )}
     </View>
   );
 };

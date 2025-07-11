@@ -23,6 +23,8 @@ const Joystick: React.FC<JoystickProps> = ({ size, onDirectionChange, currentDir
   const touchY = useSharedValue(center.y);
   const isActive = useSharedValue(false);
 
+  const DEAD_ZONE_RADIUS = maxOffset * 0.1; // 10% of maxOffset as dead zone
+
   const stickPosition = useDerivedValue(() => {
     const dx = touchX.value - center.x;
     const dy = touchY.value - center.y;
@@ -63,18 +65,17 @@ const Joystick: React.FC<JoystickProps> = ({ size, onDirectionChange, currentDir
   const updateDirection = (x: number, y: number) => {
     const dx = x - center.x;
     const dy = y - center.y;
-    const angle = Math.atan2(dy, dx); // Angle in radians
+    const distance = Math.sqrt(dx * dx + dy * dy);
 
+    if (distance < DEAD_ZONE_RADIUS) {
+      // Optionally, could call onDirectionChange(null) if snake should stop
+      return; // Input is within the dead zone
+    }
+
+    const angle = Math.atan2(dy, dx); // Angle in radians
     let newDirection: Direction | null = null;
 
     // Determine direction based on angle
-    // Top-Right: -PI/2 to 0
-    // Bottom-Right: 0 to PI/2
-    // Bottom-Left: PI/2 to PI
-    // Top-Left: -PI to -PI/2
-
-    const angleDeg = angle * 180 / Math.PI; // For easier understanding
-
     if (Math.abs(dx) > Math.abs(dy)) { // More horizontal movement
       if (dx > 0) newDirection = 'RIGHT';
       else newDirection = 'LEFT';
