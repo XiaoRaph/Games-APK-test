@@ -242,19 +242,19 @@ const Game: React.FC = () => {
 
       {isGameOver && (
         <View style={styles.gameOverOverlay}>
-          <Text style={styles.gameOverText}>Game Over</Text>
-          <Text style={styles.finalScoreText}>Final Score: {score}</Text>
-          <TouchableOpacity style={styles.replayButton} onPress={resetGame}>
+          {/* <Text style={styles.gameOverText}>Game Over</Text> */}
+          {/* <Text style={styles.finalScoreText}>Final Score: {score}</Text> */}
+          {/* <TouchableOpacity style={styles.replayButton} onPress={resetGame}>
             <Text style={styles.replayButtonText}>Replay</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       )}
 
-      {!isGameOver && (
+      {/* {!isGameOver && (
         <View style={styles.joystickContainer}>
           <Joystick size={150} onDirectionChange={handleDirectionChange} currentDirection={direction} />
         </View>
-      )}
+      )} */}
     </View>
   );
 };
