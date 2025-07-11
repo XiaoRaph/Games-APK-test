@@ -118,20 +118,21 @@ const Game: React.FC = () => {
   // }, [gridPath]);
 
   useEffect(() => {
-    if (isGameOver) {
-      if (gameLoopIntervalRef.current) {
-        clearInterval(gameLoopIntervalRef.current);
-        gameLoopIntervalRef.current = null;
-      }
-      return;
+    let isMounted = true;
+
+    if (!isGameOver && !gameLoopIntervalRef.current) {
+      gameLoopIntervalRef.current = setInterval(() => {
+        if (isMounted) {
+          updateGame();
+        }
+      }, GAME_SPEED_MS);
+    } else if (isGameOver && gameLoopIntervalRef.current) {
+      clearInterval(gameLoopIntervalRef.current);
+      gameLoopIntervalRef.current = null;
     }
 
-    // Start or restart the game loop
-    if (!gameLoopIntervalRef.current) {
-        gameLoopIntervalRef.current = setInterval(updateGame, GAME_SPEED_MS);
-    }
-
-    return () => { // Cleanup on component unmount or before isGameOver changes back to false (if that happens)
+    return () => {
+      isMounted = false;
       if (gameLoopIntervalRef.current) {
         clearInterval(gameLoopIntervalRef.current);
         gameLoopIntervalRef.current = null;
@@ -153,9 +154,9 @@ const Game: React.FC = () => {
   // }, []);
 
   // Game Over text paint
-  const gameOverTextPaint = Skia.Paint(); // This will also be memoized later if Game Over UI is added
-  gameOverTextPaint.setColor(Skia.Color(COLORS.red));
-  gameOverTextPaint.setStyle(PaintStyle.Fill);
+  // const gameOverTextPaint = Skia.Paint(); // This will also be memoized later if Game Over UI is added
+  // gameOverTextPaint.setColor(Skia.Color(COLORS.red));
+  // gameOverTextPaint.setStyle(PaintStyle.Fill);
   // gameOverTextPaint.setAntiAlias(true);
 
   // const scoreFont: Skia.Font | null = useMemo(() => { // Commenting out score display logic
@@ -177,7 +178,8 @@ const Game: React.FC = () => {
   //       }
 
   //       if (typeface) {
-  //         return Skia.Font(typeface, 20);
+  //         // return Skia.Font(typeface, 20); // Commented out as requested
+  //         return null; // Explicitly return null
   //       } else {
   //         console.warn("No suitable system font found for score. Score will not be displayed.");
   //         return null;
@@ -206,12 +208,14 @@ const Game: React.FC = () => {
         />
 
         {/* Food */}
-        <Circle
-          cx={food.x * TILE_SIZE + TILE_SIZE / 2}
-          cy={food.y * TILE_SIZE + TILE_SIZE / 2}
-          r={TILE_SIZE / 2.5}
-          color={COLORS.food}
-        />
+        {food && typeof food.x === 'number' && typeof food.y === 'number' && (
+          <Circle
+            cx={food.x * TILE_SIZE + TILE_SIZE / 2}
+            cy={food.y * TILE_SIZE + TILE_SIZE / 2}
+            r={TILE_SIZE / 2.5}
+            color={COLORS.food}
+          />
+        )}
 
         {/* Snake */}
         {snake.map((segment, index) => (
@@ -232,9 +236,9 @@ const Game: React.FC = () => {
                 x={10}
                 y={25} // Adjust y position as needed
                 text={`Score: ${score}`}
-                font={scoreFont}
+                // font={scoreFont} // Commented out
                 // size is managed by Skia.Font constructor
-                paint={scoreTextPaint}
+                // paint={scoreTextPaint} // Commented out
             />
         )} */}
         </Group>
