@@ -1,17 +1,21 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet,
-  Text,
-  TouchableOpacity
-} from 'react-native';
-import { Canvas, RoundedRect, Path, Skia,
-  // useDrawCallback, // Already removed
+import React, { useState, useMemo } from 'react';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import {
+  Canvas,
+  RoundedRect,
+  Path,
+  Skia,
   Circle,
-  // Text as SkiaText, // Logic for score display commented out
-  // PaintStyle, // Logic for score display commented out
-  Group } from '@shopify/react-native-skia';
+  Group,
+  useClock,
+  useSharedValue,
+  useDerivedValue,
+  runOnJS,
+} from '@shopify/react-native-skia';
+import { useAnimatedReaction } from 'react-native-reanimated';
+import { Direction, Food, Snake as SnakeType, Coordinates } from '../types';
 import { COLORS, CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, GRID_SIZE, GAME_SPEED_MS, DIRECTIONS } from '../constants/gameConstants';
-import { Snake as SnakeType, Coordinates, Direction, Food } from '../types';
-import Joystick from '../components/Joystick'; // Will be uncommented later
+import Joystick from '../components/Joystick';
 
 const getRandomPosition = (snakeBody: SnakeType): Coordinates => {
   let position: Coordinates;
@@ -25,20 +29,21 @@ const getRandomPosition = (snakeBody: SnakeType): Coordinates => {
 };
 
 const Game: React.FC = () => {
-  const initialSnake: SnakeType = [
+  const initialSnake: SnakeType = useMemo(() => [
     { x: 5, y: 5 },
     { x: 4, y: 5 },
     { x: 3, y: 5 },
-  ];
-  const [snake, setSnake] = useState<SnakeType>(initialSnake);
-  const [direction, setDirection] = useState<Direction>('RIGHT');
-  const [food, setFood] = useState<Food>(getRandomPosition(initialSnake));
+  ], []);
+
+  const snake = useSharedValue<SnakeType>(initialSnake);
+  const direction = useSharedValue<Direction>('RIGHT');
+  const [food, setFood] = useState<Food>(() => getRandomPosition(initialSnake));
   const [score, setScore] = useState<number>(0);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
-  const gameLoopIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
+  const clock = useClock();
+  const lastUpdateTime = useSharedValue<number>(0);
 
-
-  // Grid drawing
+  // Grid drawing (static, so no need for state/memo)
   const gridPath = Skia.Path.Make();
   for (let i = 0; i <= GRID_SIZE; i++) {
     gridPath.moveTo(i * TILE_SIZE, 0);
@@ -47,98 +52,84 @@ const Game: React.FC = () => {
     gridPath.lineTo(CANVAS_WIDTH, i * TILE_SIZE);
   }
 
-  const handleDirectionChange = useCallback((newDirection: Direction | null) => {
-    if (newDirection) {
-      // Basic check to prevent immediate 180-degree turns.
-      // More sophisticated logic might be needed in Joystick or here.
-      const currentMove = DIRECTIONS[direction];
-      const newMove = DIRECTIONS[newDirection];
-      if (currentMove.x + newMove.x === 0 && currentMove.y + newMove.y === 0) {
-        // Trying to move directly opposite
-        return;
-      }
-      setDirection(newDirection);
-    }
-  }, [direction]); // Add direction to dependencies
+  const resetGame = () => {
+    snake.value = initialSnake;
+    direction.value = 'RIGHT';
+    setFood(getRandomPosition(initialSnake));
+    setScore(0);
+    setIsGameOver(false);
+    lastUpdateTime.value = clock.value; // Reset game loop timer
+  };
 
-  const updateGame = useCallback(() => {
-    setSnake(prevSnake => {
-      const newSnake = prevSnake.map(segment => ({ ...segment }));
+  const handleGameOver = runOnJS(() => {
+    setIsGameOver(true);
+  });
+
+  const handleEatFood = runOnJS((newSnake: SnakeType) => {
+    setScore(s => s + 10);
+    setFood(getRandomPosition(newSnake));
+  });
+
+  useDerivedValue(() => {
+    if (isGameOver) {
+      return;
+    }
+    const currentTime = clock.value;
+    if (currentTime - lastUpdateTime.value > GAME_SPEED_MS) {
+      lastUpdateTime.value = currentTime;
+
+      const newSnake = [...snake.value];
       const head = { ...newSnake[0] };
-      const move = DIRECTIONS[direction];
+      const move = DIRECTIONS[direction.value];
 
       head.x += move.x;
       head.y += move.y;
 
-      // Check for wall collision
+      // Wall collision
       if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
-        setIsGameOver(true);
-        return prevSnake; // Don't update snake further
+        handleGameOver();
+        return;
       }
 
-      // Check for self-collision (excluding the very tail, which will move away)
-      for (let i = 1; i < newSnake.length -1 ; i++) {
+      // Self-collision
+      for (let i = 1; i < newSnake.length; i++) {
         if (newSnake[i].x === head.x && newSnake[i].y === head.y) {
-          setIsGameOver(true);
-          return prevSnake; // Don't update snake further
+          handleGameOver();
+          return;
         }
-      }
-
-      let ateFood = false;
-      if (head.x === food.x && head.y === food.y) {
-        ateFood = true;
-        setScore(s => s + 10); // Increment score
-        setFood(getRandomPosition(newSnake)); // Pass newSnake to avoid spawning on just moved head
       }
 
       newSnake.unshift(head);
 
-      if (!ateFood) {
+      // Food collision
+      if (head.x === food.x && head.y === food.y) {
+        handleEatFood(newSnake);
+      } else {
         newSnake.pop();
       }
-      return newSnake;
-    });
-  }, [direction, food]); // Removed score from here, setScore is stable
 
-  const resetGame = () => {
-    setSnake(initialSnake);
-    setDirection('RIGHT');
-    setFood(getRandomPosition(initialSnake));
-    setScore(0);
-    setIsGameOver(false);
-  };
-
-  // useDrawCallback((canvas) => {
-  //   canvas.drawColor(Skia.Color(COLORS.black));
-  //   const gridPaint = Skia.Paint();
-  //   gridPaint.setColor(Skia.Color(COLORS.grey));
-  //   gridPaint.setStyle(Skia.PaintStyle.Stroke);
-  //   gridPaint.setStrokeWidth(0.5);
-  //   canvas.drawPath(gridPath, gridPaint);
-  // }, [gridPath]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    if (!isGameOver && !gameLoopIntervalRef.current) {
-      gameLoopIntervalRef.current = setInterval(() => {
-        if (isMounted) {
-          updateGame();
-        }
-      }, GAME_SPEED_MS);
-    } else if (isGameOver && gameLoopIntervalRef.current) {
-      clearInterval(gameLoopIntervalRef.current);
-      gameLoopIntervalRef.current = null;
+      snake.value = newSnake;
     }
+  }, [clock, food, isGameOver]);
 
-    return () => {
-      isMounted = false;
-      if (gameLoopIntervalRef.current) {
-        clearInterval(gameLoopIntervalRef.current);
-        gameLoopIntervalRef.current = null;
-      }
-    };
-  }, [updateGame, isGameOver]); // Add isGameOver as a dependency
+  const snakePath = useDerivedValue(() => {
+    const path = Skia.Path.Make();
+    snake.value.forEach((segment) => {
+      path.addRRect(
+        Skia.RRectXY(
+          Skia.XYWHRect(
+            segment.x * TILE_SIZE,
+            segment.y * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE
+          ),
+          3,
+          3
+        )
+      );
+    });
+    return path;
+  }, [snake]);
 
   // Score text paint
   // const scoreTextPaint = Skia.Paint(); // Original declaration, now replaced by useMemo version
@@ -218,17 +209,16 @@ const Game: React.FC = () => {
         )}
 
         {/* Snake */}
-        {snake.map((segment, index) => (
-          <RoundedRect
-            key={index}
-            x={segment.x * TILE_SIZE}
-            y={segment.y * TILE_SIZE}
-            width={TILE_SIZE}
-            height={TILE_SIZE}
-            r={3}
-            color={index === 0 ? COLORS.snakeHead : COLORS.snakeBody}
-          />
-        ))}
+        <Path path={snakePath} color={COLORS.snakeBody} />
+        {/* We can draw the head separately if we want a different color */}
+        <RoundedRect
+          x={snake.value[0].x * TILE_SIZE}
+          y={snake.value[0].y * TILE_SIZE}
+          width={TILE_SIZE}
+          height={TILE_SIZE}
+          r={3}
+          color={COLORS.snakeHead}
+        />
 
         {/* Score Display */}
         {/* {scoreFont && ( // Commenting out score display logic
@@ -256,7 +246,7 @@ const Game: React.FC = () => {
 
       {!isGameOver && (
         <View style={styles.joystickContainer}>
-          <Joystick size={150} onDirectionChange={handleDirectionChange} currentDirection={direction} />
+          <Joystick size={150} direction={direction} />
         </View>
       )}
     </View>

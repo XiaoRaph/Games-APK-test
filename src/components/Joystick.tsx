@@ -1,19 +1,19 @@
 import React from 'react';
 import { Canvas, Circle, Path, Skia, useTouchHandler, useSharedValue, useDerivedValue } from '@shopify/react-native-skia';
+import { SharedValue } from 'react-native-reanimated';
 import { COLORS, DIRECTIONS } from '../constants/gameConstants';
 import { Direction } from '../types';
 
 interface JoystickProps {
   size: number;
-  onDirectionChange: (direction: Direction | null) => void;
-  currentDirection: Direction; // To prevent moving directly opposite
+  direction: SharedValue<Direction>;
 }
 
 const STICK_RADIUS_RATIO = 0.3; // Ratio of stick radius to joystick size
 const BASE_RADIUS_RATIO = 0.8;  // Ratio of base radius to joystick size (outer ring)
 const CENTER_OFFSET_RATIO = 0.4; // How far the stick can move from the center
 
-const Joystick: React.FC<JoystickProps> = ({ size, onDirectionChange, currentDirection }) => {
+const Joystick: React.FC<JoystickProps> = ({ size, direction }) => {
   const center = { x: size / 2, y: size / 2 };
   const baseRadius = (size / 2) * BASE_RADIUS_RATIO;
   const stickRadius = (size / 2) * STICK_RADIUS_RATIO;
@@ -37,57 +37,56 @@ const Joystick: React.FC<JoystickProps> = ({ size, onDirectionChange, currentDir
       };
     }
     return { x: touchX.value, y: touchY.value };
-  }, [touchX, touchY, isActive]); // Rerun when touchX, touchY or isActive changes
+  }, [touchX, touchY]);
 
-  // Memoized updateDirection function
-  const updateDirection = React.useCallback((x: number, y: number) => {
-    const dx = x - center.x;
-    const dy = y - center.y;
+  const touchHandler = useTouchHandler({
+    onStart: (event) => {
+      "worklet";
+      isActive.value = true;
+      touchX.value = event.x;
+      touchY.value = event.y;
+    },
+    onActive: (event) => {
+      "worklet";
+      touchX.value = event.x;
+      touchY.value = event.y;
+    },
+    onEnd: () => {
+      "worklet";
+      isActive.value = false;
+      touchX.value = center.x;
+      touchY.value = center.y;
+    },
+  });
+
+  useDerivedValue(() => {
+    "worklet";
+    const dx = touchX.value - center.x;
+    const dy = touchY.value - center.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     if (distance < DEAD_ZONE_RADIUS) {
-      return; // Input is within the dead zone
+      return;
     }
 
     let newDirection: Direction | null = null;
-    if (Math.abs(dx) > Math.abs(dy)) { // More horizontal movement
+    if (Math.abs(dx) > Math.abs(dy)) {
       if (dx > 0) newDirection = 'RIGHT';
       else newDirection = 'LEFT';
-    } else { // More vertical movement
+    } else {
       if (dy > 0) newDirection = 'DOWN';
       else newDirection = 'UP';
     }
 
     if (newDirection) {
-        if (currentDirection === 'UP' && newDirection === 'DOWN') return;
-        if (currentDirection === 'DOWN' && newDirection === 'UP') return;
-        if (currentDirection === 'LEFT' && newDirection === 'RIGHT') return;
-        if (currentDirection === 'RIGHT' && newDirection === 'LEFT') return;
-        onDirectionChange(newDirection);
+      const currentDirection = direction.value;
+      if (currentDirection === 'UP' && newDirection === 'DOWN') return;
+      if (currentDirection === 'DOWN' && newDirection === 'UP') return;
+      if (currentDirection === 'LEFT' && newDirection === 'RIGHT') return;
+      if (currentDirection === 'RIGHT' && newDirection === 'LEFT') return;
+      direction.value = newDirection;
     }
-  }, [center.x, center.y, DEAD_ZONE_RADIUS, currentDirection, onDirectionChange]);
-
-  const touchHandler = useTouchHandler({
-    onStart: (event) => {
-      isActive.value = true;
-      touchX.value = event.x;
-      touchY.value = event.y;
-      updateDirection(event.x, event.y);
-    },
-    onActive: (event) => {
-      if (isActive.value) {
-        touchX.value = event.x;
-        touchY.value = event.y;
-        updateDirection(event.x, event.y);
-      }
-    },
-    onEnd: () => {
-      isActive.value = false;
-      touchX.value = center.x; // Reset stick to center
-      touchY.value = center.y;
-      // onDirectionChange(null); // Optional: stop movement on release
-    },
-  }, [updateDirection]); // Add memoized updateDirection to touchHandler dependencies
+  }, [touchX, touchY, direction]);
 
   // Base of the joystick
   const baseOuterPath = Skia.Path.Make();
