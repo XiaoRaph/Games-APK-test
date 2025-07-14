@@ -11,6 +11,7 @@ jest.mock('@shopify/react-native-skia', () => {
   return {
     Canvas: MockComponent,
     Circle: 'Circle',
+    Rect: 'Rect',
     Group: MockComponent,
   };
 }, { virtual: true });

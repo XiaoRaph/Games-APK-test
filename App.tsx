@@ -5,9 +5,8 @@
  * @format
  */
 
-import React from 'react'; // Added React import
+import React, { useState, useEffect } from 'react'; // Added React import
 import { StatusBar, StyleSheet, useColorScheme, View, Text, TouchableOpacity } from 'react-native';
-import { useEffect } from 'react';
 import { Canvas, Circle, Group } from "@shopify/react-native-skia"; // Updated imports
 import {
   useSharedValue,
@@ -16,6 +15,7 @@ import {
   withTiming,
 } from 'react-native-reanimated';
 import { Dimensions } from 'react-native'; // Added Dimensions import
+import SnakeGame from './SnakeGame';
 
 // Type definition for AnimatedCircle props
 type AnimatedCircleProps = {
@@ -66,35 +66,47 @@ function App() {
 
   // Define fixed height for the canvas for now
   const canvasHeight = screenHeight * 0.6; // Canvas takes 60% of screen height
+  const [startGame, setStartGame] = useState(false);
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <View style={{height: canvasHeight, width: '100%'}}>
-        <Canvas style={{ flex: 1 }}>
-          <Group blendMode="multiply">
-            {/* centerX and centerY reference canvasHeight to center the circles within the canvas */}
-            <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={0} color="cyan" />
-            <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={(Math.PI * 2) / 3}  color="magenta" />
-            <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={(Math.PI * 4) / 3}  color="yellow" />
-          </Group>
-        </Canvas>
-      </View>
+      {!startGame ? (
+        <>
+          <View style={{height: canvasHeight, width: '100%'}}>
+            <Canvas style={{ flex: 1 }}>
+              <Group blendMode="multiply">
+                {/* centerX and centerY reference canvasHeight to center the circles within the canvas */}
+                <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={0} color="cyan" />
+                <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={(Math.PI * 2) / 3}  color="magenta" />
+                <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={(Math.PI * 4) / 3}  color="yellow" />
+              </Group>
+            </Canvas>
+          </View>
 
-      {/* Content View is now below the Canvas */}
-      <View style={styles.content}>
-        <Text style={styles.title}>Bienvenue sur Games APK</Text>
-        <Text style={styles.subtitle}>Découvrez et lancez vos jeux préférés !</Text>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Commencer</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Explorer</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>À propos</Text>
-        </TouchableOpacity>
-      </View>
+          {/* Content View is now below the Canvas */}
+          <View style={styles.content}>
+            <Text style={styles.title}>Bienvenue sur Games APK</Text>
+            <Text style={styles.subtitle}>Découvrez et lancez vos jeux préférés !</Text>
+            <TouchableOpacity style={styles.button} onPress={() => setStartGame(true)}>
+              <Text style={styles.buttonText}>Commencer</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttonText}>Explorer</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttonText}>À propos</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      ) : (
+        <>
+          <SnakeGame />
+          <TouchableOpacity style={styles.button} onPress={() => setStartGame(false)}>
+            <Text style={styles.buttonText}>Retour</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 }
