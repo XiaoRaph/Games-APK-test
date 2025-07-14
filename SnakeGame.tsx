@@ -49,9 +49,8 @@ const Joystick = ({ onDirectionChange }: { onDirectionChange: (dir: string) => v
   );
 
   return (
-    <View style={styles.joystick}>
+    <View {...responder.panHandlers} style={styles.joystick}>
       <View
-        {...responder.panHandlers}
         style={[
           styles.joystickKnob,
           { transform: [{ translateX: position.x }, { translateY: position.y }] },
@@ -179,18 +178,18 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   joystick: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     backgroundColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
   },
   joystickKnob: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: 'rgba(255,255,255,0.5)',
   },
   gameOver: {
