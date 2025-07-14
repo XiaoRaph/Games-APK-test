@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, PanResponder } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, PanResponder, Dimensions } from 'react-native';
 import { Canvas, Rect } from '@shopify/react-native-skia';
 
 const COLS = 20;
@@ -97,9 +97,10 @@ export default function SnakeGame() {
     return () => clearInterval(id);
   }, [direction, food, speed, gameOver]);
 
-  const cell = 10;
-  const width = COLS * cell;
-  const height = ROWS * cell;
+  const { width: screenW, height: screenH } = Dimensions.get('window');
+  const cell = Math.floor(Math.min(screenW / COLS, screenH / ROWS));
+  const width = cell * COLS;
+  const height = cell * ROWS;
 
   const changeDirection = (dir: string) => {
     setDirection(prev => {
@@ -156,6 +157,7 @@ export default function SnakeGame() {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
+    paddingVertical: 10,
   },
   score: {
     color: '#fff',
@@ -183,6 +185,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 10,
   },
   joystickKnob: {
     width: 40,
