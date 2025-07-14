@@ -62,7 +62,7 @@ function App() {
   const size = screenWidth * 0.33;
   const centerX = screenWidth / 2;
   // const centerY = screenHeight / 2 - headerHeight; // Adjusted for no headerHeight
-  const centerY = screenHeight / 2; // This will be adjusted in the next step for canvas-relative positioning
+  const centerY = screenHeight / 2; // Canvas centered vertically using screenHeight
 
   // Define fixed height for the canvas for now
   const canvasHeight = screenHeight * 0.6; // Canvas takes 60% of screen height
@@ -73,8 +73,7 @@ function App() {
       <View style={{height: canvasHeight, width: '100%'}}>
         <Canvas style={{ flex: 1 }}>
           <Group blendMode="multiply">
-            {/* centerX and centerY for AnimatedCircle will need adjustment in the next step
-                to be relative to this new canvasHeight and its actual center */}
+            {/* centerX and centerY reference canvasHeight to center the circles within the canvas */}
             <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={0} color="cyan" />
             <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={(Math.PI * 2) / 3}  color="magenta" />
             <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={(Math.PI * 4) / 3}  color="yellow" />
