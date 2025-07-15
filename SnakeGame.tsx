@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, PanResponder, Dimensions } from 'react-native';
-import { Canvas, Rect } from '@shopify/react-native-skia';
+import { Canvas, Circle } from '@shopify/react-native-skia';
 
 const COLS = 20;
 const ROWS = 30;
@@ -169,26 +169,17 @@ export default function SnakeGame({ initialSpeed, onExit }: SnakeGameProps) {
     <View style={styles.container}>
       <Canvas style={{ width, height }}>
         {snake.map((p, i) => (
-          <Rect
+          <Circle
             key={i}
-            x={p.x * cell}
-            y={p.y * cell}
-            width={cell}
-            height={cell}
-            color="lime"
+            cx={p.x * cell + cell / 2}
+            cy={p.y * cell + cell / 2}
+            r={cell / 2}
+            color={i === 0 ? '#4CAF50' : '#6FCF97'}
           />
         ))}
-        <Rect x={food.x * cell} y={food.y * cell} width={cell} height={cell} color="red" />
+        <Circle cx={food.x * cell + cell / 2} cy={food.y * cell + cell / 2} r={cell / 2} color="#e74c3c" />
       </Canvas>
       <Text style={styles.score}>Score: {score}</Text>
-      <View style={styles.speedControls}>
-        <TouchableOpacity onPress={() => setSpeed(s => Math.max(50, s - 50))} style={styles.speedBtn}>
-          <Text style={styles.speedText}>Faster</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setSpeed(s => s + 50)} style={styles.speedBtn}>
-          <Text style={styles.speedText}>Slower</Text>
-        </TouchableOpacity>
-      </View>
       <Joystick onDirectionChange={changeDirection} onEdgeTouch={handleEdgeTouch} />
       {gameOver && (
         <TouchableOpacity onPress={resetGame} style={styles.gameOver}>
@@ -214,20 +205,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     marginVertical: 8,
-  },
-  speedControls: {
-    flexDirection: 'row',
-    marginBottom: 8,
-  },
-  speedBtn: {
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginHorizontal: 4,
-    borderRadius: 4,
-  },
-  speedText: {
-    color: '#fff',
   },
   joystick: {
     width: 120,
