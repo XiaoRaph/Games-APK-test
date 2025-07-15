@@ -103,6 +103,19 @@ export default function SnakeGame({ initialSpeed, onExit }: SnakeGameProps) {
   const [gameOver, setGameOver] = useState(false);
   const [showBack, setShowBack] = useState(false);
   const hideBackTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [windowDims, setWindowDims] = useState(Dimensions.get('window'));
+
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setWindowDims(window);
+    });
+    return () => {
+      // RN < 0.65 uses remove; new versions have remove() on object
+      if (typeof subscription?.remove === 'function') {
+        subscription.remove();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     setSpeed(initialSpeed);
@@ -136,7 +149,7 @@ export default function SnakeGame({ initialSpeed, onExit }: SnakeGameProps) {
     return () => clearInterval(id);
   }, [direction, food, speed, gameOver]);
 
-  const { width: screenW, height: screenH } = Dimensions.get('window');
+  const { width: screenW, height: screenH } = windowDims;
   const cell = Math.floor(Math.min(screenW / COLS, screenH / ROWS));
   const width = cell * COLS;
   const height = cell * ROWS;
