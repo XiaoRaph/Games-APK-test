@@ -57,15 +57,13 @@ const AnimatedCircle = ({color, size, centerX, centerY, initialAngle}: AnimatedC
 function App() {
   const isDarkMode = useColorScheme() === 'dark'; // Moved inside App
   // const headerHeight = useHeaderHeight(); // Assuming no header or headerHeight is 0 for now
-  const screenWidth = Dimensions.get("window").width;
-  const screenHeight = Dimensions.get("window").height;
+  const screenWidth = Dimensions.get('window').width;
+  const screenHeight = Dimensions.get('window').height;
+  // Define fixed height for the canvas
+  const canvasHeight = screenHeight * 0.6; // Canvas takes 60% of screen height
   const size = screenWidth * 0.33;
   const centerX = screenWidth / 2;
-  // const centerY = screenHeight / 2 - headerHeight; // Adjusted for no headerHeight
-  const centerY = screenHeight / 2; // Canvas centered vertically using screenHeight
-
-  // Define fixed height for the canvas for now
-  const canvasHeight = screenHeight * 0.6; // Canvas takes 60% of screen height
+  const centerY = canvasHeight / 2; // Canvas centered vertically
   const [screen, setScreen] = useState<'home' | 'settings' | 'game'>('home');
   const [speed, setSpeed] = useState(300); // default slow
 
@@ -75,9 +73,9 @@ function App() {
         <Canvas style={{ flex: 1 }}>
           <Group blendMode="multiply">
                 {/* centerX and centerY reference canvasHeight to center the circles within the canvas */}
-                <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={0} color="cyan" />
-                <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={(Math.PI * 2) / 3}  color="magenta" />
-                <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={(Math.PI * 4) / 3}  color="yellow" />
+                <AnimatedCircle centerX={centerX} centerY={centerY} size={size} initialAngle={0} color="cyan" />
+                <AnimatedCircle centerX={centerX} centerY={centerY} size={size} initialAngle={(Math.PI * 2) / 3} color="magenta" />
+                <AnimatedCircle centerX={centerX} centerY={centerY} size={size} initialAngle={(Math.PI * 4) / 3} color="yellow" />
               </Group>
             </Canvas>
           </View>
