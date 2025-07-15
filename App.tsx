@@ -66,16 +66,14 @@ function App() {
 
   // Define fixed height for the canvas for now
   const canvasHeight = screenHeight * 0.6; // Canvas takes 60% of screen height
-  const [startGame, setStartGame] = useState(false);
+  const [screen, setScreen] = useState<'home' | 'settings' | 'game'>('home');
+  const [speed, setSpeed] = useState(300); // default slow
 
-  return (
-    <View style={styles.container}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      {!startGame ? (
-        <>
-          <View style={{height: canvasHeight, width: '100%'}}>
-            <Canvas style={{ flex: 1 }}>
-              <Group blendMode="multiply">
+  const HomeScreen = () => (
+    <>
+      <View style={{height: canvasHeight, width: '100%'}}>
+        <Canvas style={{ flex: 1 }}>
+          <Group blendMode="multiply">
                 {/* centerX and centerY reference canvasHeight to center the circles within the canvas */}
                 <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={0} color="cyan" />
                 <AnimatedCircle centerX={screenWidth / 2} centerY={canvasHeight / 2} size={size} initialAngle={(Math.PI * 2) / 3}  color="magenta" />
@@ -88,24 +86,44 @@ function App() {
           <View style={styles.content}>
             <Text style={styles.title}>Bienvenue sur Games APK</Text>
             <Text style={styles.subtitle}>Découvrez et lancez vos jeux préférés !</Text>
-            <TouchableOpacity style={styles.button} onPress={() => setStartGame(true)}>
-              <Text style={styles.buttonText}>Commencer</Text>
-            </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => setScreen('settings')}>
+          <Text style={styles.buttonText}>Commencer</Text>
+        </TouchableOpacity>
             <TouchableOpacity style={styles.button}>
               <Text style={styles.buttonText}>Explorer</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.button}>
               <Text style={styles.buttonText}>À propos</Text>
             </TouchableOpacity>
-          </View>
-        </>
-      ) : (
-        <>
-          <SnakeGame />
-          <TouchableOpacity style={styles.button} onPress={() => setStartGame(false)}>
+      </View>
+    </>
+  );
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      {screen === 'home' && (
+        <HomeScreen />
+      )}
+      {screen === 'settings' && (
+        <View style={styles.content}>
+          <Text style={styles.title}>Choisissez la vitesse</Text>
+          <TouchableOpacity style={styles.button} onPress={() => {setSpeed(300); setScreen('game');}}>
+            <Text style={styles.buttonText}>Lent</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={() => {setSpeed(200); setScreen('game');}}>
+            <Text style={styles.buttonText}>Moyen</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={() => {setSpeed(100); setScreen('game');}}>
+            <Text style={styles.buttonText}>Rapide</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={() => setScreen('home')}>
             <Text style={styles.buttonText}>Retour</Text>
           </TouchableOpacity>
-        </>
+        </View>
+      )}
+      {screen === 'game' && (
+        <SnakeGame initialSpeed={speed} onExit={() => setScreen('home')} />
       )}
     </View>
   );
