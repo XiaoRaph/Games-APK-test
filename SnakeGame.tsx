@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, PanResponder, Dimensions } from 'react-native';
 import { Canvas, Rect } from '@shopify/react-native-skia';
 
@@ -19,16 +19,35 @@ function randomFood(snake: Point[]): Point {
   return food;
 }
 
-const Joystick = ({ onDirectionChange }: { onDirectionChange: (dir: string) => void }) => {
+const EDGE_SIZE = 30;
+
+const Joystick = ({ onDirectionChange, onEdgeTouch }: { onDirectionChange: (dir: string) => void; onEdgeTouch: () => void }) => {
+  const [startPos, setStartPos] = useState<{ x: number; y: number } | null>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   const responder = useMemo(
     () =>
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
+        onPanResponderGrant: (_, gesture) => {
+          const { x0, y0 } = gesture;
+          const { width: screenW, height: screenH } = Dimensions.get('window');
+          if (
+            x0 < EDGE_SIZE ||
+            x0 > screenW - EDGE_SIZE ||
+            y0 < EDGE_SIZE ||
+            y0 > screenH - EDGE_SIZE
+          ) {
+            onEdgeTouch();
+            setStartPos(null);
+          } else {
+            setStartPos({ x: x0, y: y0 });
+          }
+        },
         onPanResponderMove: (_, gesture) => {
-          const dx = gesture.dx;
-          const dy = gesture.dy;
+          if (!startPos) return;
+          const dx = gesture.moveX - startPos.x;
+          const dy = gesture.moveY - startPos.y;
           const lim = 40;
           const x = Math.max(-lim, Math.min(lim, dx));
           const y = Math.max(-lim, Math.min(lim, dy));
@@ -42,31 +61,52 @@ const Joystick = ({ onDirectionChange }: { onDirectionChange: (dir: string) => v
           }
         },
         onPanResponderRelease: () => {
+          setStartPos(null);
           setPosition({ x: 0, y: 0 });
         },
       }),
-    [onDirectionChange],
+    [onDirectionChange, onEdgeTouch, startPos],
   );
 
   return (
-    <View {...responder.panHandlers} style={styles.joystick}>
-      <View
-        style={[
-          styles.joystickKnob,
-          { transform: [{ translateX: position.x }, { translateY: position.y }] },
-        ]}
-      />
+    <View {...responder.panHandlers} style={StyleSheet.absoluteFill}>
+      {startPos && (
+        <View
+          style={[
+            styles.joystick,
+            { position: 'absolute', left: startPos.x - 60, top: startPos.y - 60 },
+          ]}
+        >
+          <View
+            style={[
+              styles.joystickKnob,
+              { transform: [{ translateX: position.x }, { translateY: position.y }] },
+            ]}
+          />
+        </View>
+      )}
     </View>
   );
 };
 
-export default function SnakeGame() {
+interface SnakeGameProps {
+  initialSpeed: number;
+  onExit: () => void;
+}
+
+export default function SnakeGame({ initialSpeed, onExit }: SnakeGameProps) {
   const [snake, setSnake] = useState<Point[]>(INITIAL_SNAKE);
   const [direction, setDirection] = useState<Point>({ x: 1, y: 0 });
   const [food, setFood] = useState<Point>(() => randomFood(INITIAL_SNAKE));
-  const [speed, setSpeed] = useState(200); // ms per move
+  const [speed, setSpeed] = useState(initialSpeed); // ms per move
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [showBack, setShowBack] = useState(false);
+  const hideBackTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setSpeed(initialSpeed);
+  }, [initialSpeed]);
 
   useEffect(() => {
     if (gameOver) return;
@@ -119,6 +159,12 @@ export default function SnakeGame() {
     setGameOver(false);
   };
 
+  const handleEdgeTouch = () => {
+    setShowBack(true);
+    if (hideBackTimeout.current) clearTimeout(hideBackTimeout.current);
+    hideBackTimeout.current = setTimeout(() => setShowBack(false), 2000);
+  };
+
   return (
     <View style={styles.container}>
       <Canvas style={{ width, height }}>
@@ -143,10 +189,15 @@ export default function SnakeGame() {
           <Text style={styles.speedText}>Slower</Text>
         </TouchableOpacity>
       </View>
-      <Joystick onDirectionChange={changeDirection} />
+      <Joystick onDirectionChange={changeDirection} onEdgeTouch={handleEdgeTouch} />
       {gameOver && (
         <TouchableOpacity onPress={resetGame} style={styles.gameOver}>
           <Text style={styles.gameOverText}>Game Over - Tap to Restart</Text>
+        </TouchableOpacity>
+      )}
+      {showBack && (
+        <TouchableOpacity onPress={onExit} style={styles.backButton}>
+          <Text style={styles.backButtonText}>Retour</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -209,6 +260,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.6)',
   },
   gameOverText: {
+    color: '#fff',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 4,
+  },
+  backButtonText: {
     color: '#fff',
   },
 });
