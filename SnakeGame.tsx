@@ -150,9 +150,10 @@ export default function SnakeGame({ initialSpeed, onExit }: SnakeGameProps) {
   }, [direction, food, speed, gameOver]);
 
   const { width: screenW, height: screenH } = windowDims;
-  const cell = Math.floor(Math.min(screenW / COLS, screenH / ROWS));
-  const width = cell * COLS;
-  const height = cell * ROWS;
+  const cellW = screenW / COLS;
+  const cellH = screenH / ROWS;
+  const width = screenW;
+  const height = screenH;
 
   const changeDirection = (dir: string) => {
     setDirection(prev => {
@@ -180,17 +181,22 @@ export default function SnakeGame({ initialSpeed, onExit }: SnakeGameProps) {
 
   return (
     <View style={styles.container}>
-      <Canvas style={{ width, height }}>
+      <Canvas style={{ width, height, position: 'absolute', top: 0, left: 0 }}>
         {snake.map((p, i) => (
           <Circle
             key={i}
-            cx={p.x * cell + cell / 2}
-            cy={p.y * cell + cell / 2}
-            r={cell / 2}
+            cx={p.x * cellW + cellW / 2}
+            cy={p.y * cellH + cellH / 2}
+            r={Math.min(cellW, cellH) / 2}
             color={i === 0 ? '#4CAF50' : '#6FCF97'}
           />
         ))}
-        <Circle cx={food.x * cell + cell / 2} cy={food.y * cell + cell / 2} r={cell / 2} color="#e74c3c" />
+        <Circle
+          cx={food.x * cellW + cellW / 2}
+          cy={food.y * cellH + cellH / 2}
+          r={Math.min(cellW, cellH) / 2}
+          color="#e74c3c"
+        />
       </Canvas>
       <Text style={styles.score}>Score: {score}</Text>
       <Joystick onDirectionChange={changeDirection} onEdgeTouch={handleEdgeTouch} />
@@ -211,13 +217,15 @@ export default function SnakeGame({ initialSpeed, onExit }: SnakeGameProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    paddingVertical: 10,
   },
   score: {
+    position: 'absolute',
+    top: 20,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
     color: '#fff',
     fontSize: 18,
-    marginVertical: 8,
   },
   joystick: {
     width: 120,
