@@ -66,6 +66,7 @@ function App() {
   const centerY = canvasHeight / 2; // Canvas centered vertically
   const [screen, setScreen] = useState<'home' | 'settings' | 'game'>('home');
   const [speed, setSpeed] = useState(300); // default slow
+  const [scores, setScores] = useState<number[]>([]);
 
   const HomeScreen = () => (
     <>
@@ -94,6 +95,16 @@ function App() {
               <Text style={styles.buttonText}>À propos</Text>
             </TouchableOpacity>
       </View>
+      {scores.length > 0 && (
+        <View style={styles.scoresContainer}>
+          <Text style={styles.scoresTitle}>Best Scores</Text>
+          {scores.slice(0, 5).map((score, index) => (
+            <Text key={index} style={styles.scoreItem}>
+              {index + 1}. {score}
+            </Text>
+          ))}
+        </View>
+      )}
     </>
   );
 
@@ -121,7 +132,14 @@ function App() {
         </View>
       )}
       {screen === 'game' && (
-        <SnakeGame initialSpeed={speed} onExit={() => setScreen('home')} />
+        <SnakeGame
+          initialSpeed={speed}
+          onExit={() => setScreen('home')}
+          onGameOver={(score) => {
+            setScores(prevScores => [...prevScores, score].sort((a, b) => b - a));
+            setScreen('home');
+          }}
+        />
       )}
     </View>
   );
@@ -177,6 +195,24 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     letterSpacing: 1,
+  },
+  scoresContainer: {
+    marginTop: 20,
+    padding: 20,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 10,
+  },
+  scoresTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  scoreItem: {
+    fontSize: 18,
+    color: '#fff',
+    textAlign: 'center',
   },
 });
 

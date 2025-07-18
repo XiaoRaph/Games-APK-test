@@ -92,9 +92,10 @@ const Joystick = ({ onDirectionChange, onEdgeTouch }: { onDirectionChange: (dir:
 interface SnakeGameProps {
   initialSpeed: number;
   onExit: () => void;
+  onGameOver: (score: number) => void;
 }
 
-export default function SnakeGame({ initialSpeed, onExit }: SnakeGameProps) {
+export default function SnakeGame({ initialSpeed, onExit, onGameOver }: SnakeGameProps) {
   const [snake, setSnake] = useState<Point[]>(INITIAL_SNAKE);
   const [direction, setDirection] = useState<Point>({ x: 1, y: 0 });
   const [food, setFood] = useState<Point>(() => randomFood(INITIAL_SNAKE));
@@ -135,6 +136,7 @@ export default function SnakeGame({ initialSpeed, onExit }: SnakeGameProps) {
           prev.some(p => p.x === newHead.x && p.y === newHead.y)
         ) {
           setGameOver(true);
+          onGameOver(score);
           return prev;
         }
         const eat = newHead.x === food.x && newHead.y === food.y;
@@ -147,7 +149,7 @@ export default function SnakeGame({ initialSpeed, onExit }: SnakeGameProps) {
       });
     }, speed);
     return () => clearInterval(id);
-  }, [direction, food, speed, gameOver]);
+  }, [direction, food, speed, gameOver, onGameOver, score]);
 
   const { width: screenW, height: screenH } = windowDims;
   const cellW = screenW / COLS;
